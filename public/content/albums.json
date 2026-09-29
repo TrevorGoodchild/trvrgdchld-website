@@ -1,0 +1,64 @@
+{
+  "albums": [
+    {
+      "slug": "waldbuehne-berlin-2026",
+      "title_en": "Zach Brian – Waldbühne Berlin – 2026",
+      "title_de": "Zach Brian – Waldbühne Berlin – 2026",
+      "category": "event",
+      "date": "2026-05-31",
+      "place": "Waldbühne, Berlin",
+      "cover": "/assets/uploads/20260531_183153.jpg",
+      "text_en": "",
+      "text_de": "",
+      "camera": "Samsung Galaxy A52s",
+      "photos": [
+        {
+          "image": "/assets/uploads/20260531_183153.jpg",
+          "caption": "",
+          "alt": "",
+          "camera": "",
+          "focal": "25 mm",
+          "aperture": "f/1.8",
+          "shutter": "1/380 s",
+          "iso": "ISO 25"
+        },
+        {
+          "image": "/assets/uploads/20260531_205553.jpg",
+          "caption": "",
+          "alt": "",
+          "camera": "",
+          "focal": "25 mm",
+          "aperture": "f/1.8",
+          "shutter": "1/360 s",
+          "iso": "ISO 25"
+        }
+      ]
+    },
+    {
+      "slug": "landschaft",
+      "title_en": "[Album title]",
+      "title_de": "[Albumtitel]",
+      "category": "landscape",
+      "date": "",
+      "place": "",
+      "cover": "",
+      "text_en": "",
+      "text_de": "",
+      "camera": "LUMIX G70",
+      "photos": []
+    },
+    {
+      "slug": "portraits",
+      "title_en": "[Album title]",
+      "title_de": "[Albumtitel]",
+      "category": "portrait",
+      "date": "",
+      "place": "",
+      "cover": "",
+      "text_en": "",
+      "text_de": "",
+      "camera": "LUMIX G70",
+      "photos": []
+    }
+  ]
+}

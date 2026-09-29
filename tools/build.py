@@ -22,8 +22,8 @@ LEGAL_FILE = ROOT / "content" / "legal.json"
 
 # ---------------------------------------------------------------- Routen
 URL = {
-    "en": {"home": "/", "guide": "/guide/", "legal": "/legal-notice/", "privacy": "/privacy/"},
-    "de": {"home": "/de/", "guide": "/de/praxis/", "legal": "/de/impressum/", "privacy": "/de/datenschutz/"},
+    "en": {"home": "/", "guide": "/guide/", "legal": "/legal-notice/", "privacy": "/privacy/", "album": "/album/"},
+    "de": {"home": "/de/", "guide": "/de/praxis/", "legal": "/de/impressum/", "privacy": "/de/datenschutz/", "album": "/de/album/"},
 }
 
 # ---------------------------------------------------------------- Icons
@@ -53,11 +53,13 @@ T = {
         "view_work": "View work", "est": "EST.", "logo_alt": "TRVR GDCHLD Visuals logo",
         "specs": [("CAMERA", "LUMIX G70"), ("LENS", "14–42 mm · f/3.5–5.6"), ("MOTION", "DaVinci Resolve · Fusion")],
         "available": "AVAILABLE",
-        "work_eyebrow": "01 — Photography", "work_h2": "Selected work", "filter_label": "Filter by category",
+        "work_eyebrow": "01 — Photography", "work_h2": "Albums", "filter_label": "Filter by category",
         "motion_eyebrow": "02 — Motion graphics", "motion_h2": "Images in motion",
         "motion_p": "Title sequences, UI animations and logo reveals – built in DaVinci Resolve Fusion.",
         "reel_btn": "Load and play showreel",
         "reel_note": 'Clicking loads the video from YouTube, which transfers data to YouTube – see the <a href="/privacy/#youtube">privacy policy</a>.',
+        "playlists_h3": "Playlists",
+        "album_back": "All albums", "album_photos": "photos", "album_label": "Album",
         "lab_eyebrow": "03 — Lab", "lab_h2": "Every series starts<br>with a card.",
         "lab_p": "Before every test shot, I hold a card with the settings up to the lens. That way it stays clear what shutter speed, aperture, ISO and white balance do to a subject.",
         "lab_more": "More in the guide:", "lab_links": [("#aperture", "Aperture f/3.5–f/22"), ("#iso", "ISO 200–25600"), ("#wb", "White balance 2500–10000 K")],
@@ -78,11 +80,13 @@ T = {
         "view_work": "Arbeiten ansehen", "est": "SEIT", "logo_alt": "Logo TRVR GDCHLD Visuals",
         "specs": [("KAMERA", "LUMIX G70"), ("OBJEKTIV", "14–42 mm · f/3.5–5.6"), ("MOTION", "DaVinci Resolve · Fusion")],
         "available": "VERFÜGBAR",
-        "work_eyebrow": "01 — Fotografie", "work_h2": "Ausgewählte Bilder", "filter_label": "Nach Kategorie filtern",
+        "work_eyebrow": "01 — Fotografie", "work_h2": "Alben", "filter_label": "Nach Kategorie filtern",
         "motion_eyebrow": "02 — Motion Graphics", "motion_h2": "Bilder in Bewegung",
         "motion_p": "Titelsequenzen, UI-Animationen und Logo-Reveals – gebaut in DaVinci Resolve Fusion.",
         "reel_btn": "Showreel laden und abspielen",
         "reel_note": 'Mit dem Klick wird das Video von YouTube geladen. Dabei werden Daten an YouTube übertragen – mehr dazu im <a href="/de/datenschutz/#youtube">Datenschutz</a>.',
+        "playlists_h3": "Playlists",
+        "album_back": "Alle Alben", "album_photos": "Fotos", "album_label": "Album",
         "lab_eyebrow": "03 — Labor", "lab_h2": "Jede Serie beginnt<br>mit einer Karte.",
         "lab_p": "Vor jedem Testbild halte ich eine Karte mit den Einstellungen ins Bild. So bleibt nachvollziehbar, was Verschlusszeit, Blende, ISO und Weißabgleich mit einem Motiv machen.",
         "lab_more": "Mehr in der Praxis:", "lab_links": [("#blende", "Blende f/3.5–f/22"), ("#iso", "ISO 200–25600"), ("#weiss", "Weißabgleich 2500–10000 K")],
@@ -210,7 +214,7 @@ def home(lang):
 <div class="titles"><div class="eyebrow">{t['work_eyebrow']}</div><h2>{t['work_h2']}</h2></div>
 <div class="filters" id="filters" role="group" aria-label="{t['filter_label']}"></div>
 </div>
-<div class="photo-grid" id="photo-grid"></div>
+<div class="album-grid" id="album-grid"></div>
 </div>
 </section>
 
@@ -225,7 +229,8 @@ def home(lang):
 <button class="reel-play" id="reel-play" type="button" aria-label="{t['reel_btn']}">{ICON['play']}</button>
 <p class="reel-note" id="reel-note">{t['reel_note']}</p>
 </div>
-<div class="projects" id="projects"></div>
+<h3 class="sub-h">{t['playlists_h3']}</h3>
+<div class="projects" id="playlists"></div>
 </div>
 </section>
 
@@ -268,6 +273,51 @@ def home(lang):
 {footer_links(lang, 'home', alt)}
 </div>
 </section>
+
+</main>
+{YEAR_JS}</body>
+</html>
+"""
+
+
+# ---------------------------------------------------------------- Albumseite
+def album(lang):
+    t = T[lang]
+    work = "#work" if lang == "en" else "#arbeiten"
+    back = URL[lang]["home"] + work
+    return head(lang, f"{t['album_label']} – {SITE}", t["desc"], "album", "album") + header(lang, "album", "album") + f"""<main id="main" data-album-page>
+
+<section class="album-hero">
+<div class="wrap">
+<a class="back" href="{back}">{ICON['back']}{t['album_back']}</a>
+<div class="eyebrow" id="album-meta">{t['album_label']}</div>
+<h1 id="album-title">{t['album_label']}</h1>
+<p id="album-text" hidden></p>
+</div>
+</section>
+
+<section class="section album-body">
+<div class="wrap">
+<div class="album-photos" id="album-photos"></div>
+</div>
+</section>
+
+<section class="contact">
+<div class="wrap">
+<div class="contact-top">
+<h2>{t['contact_h2']}</h2>
+<a class="btn btn-dark" href="{URL[lang]['home']}{'#contact' if lang == 'en' else '#kontakt'}">{t['cta']} {ICON['arrow']}</a>
+</div>
+{footer_links(lang, 'album', 'album')}
+</div>
+</section>
+
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="{t['album_label']}">
+<button class="lb-close" type="button" aria-label="{'Close' if lang == 'en' else 'Schließen'}">×</button>
+<button class="lb-prev" type="button" aria-label="{'Previous photo' if lang == 'en' else 'Vorheriges Foto'}">‹</button>
+<figure><img alt=""><figcaption></figcaption></figure>
+<button class="lb-next" type="button" aria-label="{'Next photo' if lang == 'en' else 'Nächstes Foto'}">›</button>
+</div>
 
 </main>
 {YEAR_JS}</body>
@@ -539,6 +589,8 @@ if __name__ == "__main__":
     print("Erzeuge Seiten:")
     write("/", home("en"))
     write("/de/", home("de"))
+    write("/album/", album("en"))
+    write("/de/album/", album("de"))
     write("/guide/", guide("en"))
     write("/de/praxis/", guide("de"))
     write("/legal-notice/", legal_page("en", "legal", "imprint_en", "Legal Notice", "Legal notice of TRVR GDCHLD Visuals."))

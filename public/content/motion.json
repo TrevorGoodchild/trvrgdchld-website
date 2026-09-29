@@ -1,7 +1,0 @@
-{
-  "projects": [
-    { "title_en": "Glass UI Card", "title_de": "Glass-UI-Karte", "tag": "UI · Animation", "text_en": "A modular, SaaS-style animation toolkit built as Fusion macros.", "text_de": "Modulares Animations-Toolkit im SaaS-Look als Fusion-Macros.", "image": "", "youtube_url": "" },
-    { "title_en": "[Reel series]", "title_de": "[Reel-Serie]", "tag": "Social · Reel", "text_en": "[Short project description]", "text_de": "[Kurzbeschreibung des Projekts]", "image": "", "youtube_url": "" },
-    { "title_en": "TG Logo Animation", "title_de": "TG Logo-Animation", "tag": "Branding · Reveal", "text_en": "The monogram opens like an aperture.", "text_de": "Das Monogramm öffnet sich wie eine Blende.", "image": "", "youtube_url": "" }
-  ]
-}

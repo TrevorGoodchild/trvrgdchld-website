@@ -7,16 +7,22 @@
   var lang = (document.documentElement.lang || "en").slice(0, 2) === "de" ? "de" : "en";
   var L = {
     en: {
-      cats: { all: "All", portrait: "Portrait", street: "Street", landscape: "Landscape", product: "Product" },
-      noPhotos: "No photos in this category yet.",
+      cats: { all: "All", portrait: "Portrait", street: "Street", landscape: "Landscape", product: "Product", event: "Event & Concert" },
+      noPhotos: "No albums in this category yet.",
+      photos: "photos", photo: "photo", openAlbum: "Open album", albumMissing: "This album could not be found.",
+      emptyAlbum: "Photos for this album are coming soon.",
+      playPlaylist: "Load and play playlist", noPlaylist: "This playlist will be available soon.", months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
       watch: "Watch on YouTube",
       noReel: "The showreel will be available here soon.",
       series: "SERIES", shutter: "SHUTTER · MECH.",
       menuOpen: "Open menu", menuClose: "Close menu"
     },
     de: {
-      cats: { all: "Alle", portrait: "Portrait", street: "Street", landscape: "Landschaft", product: "Produkt" },
-      noPhotos: "In dieser Kategorie gibt es noch keine Bilder.",
+      cats: { all: "Alle", portrait: "Portrait", street: "Street", landscape: "Landschaft", product: "Produkt", event: "Event & Konzert" },
+      noPhotos: "In dieser Kategorie gibt es noch keine Alben.",
+      photos: "Fotos", photo: "Foto", openAlbum: "Album öffnen", albumMissing: "Dieses Album wurde nicht gefunden.",
+      emptyAlbum: "Die Fotos zu diesem Album folgen bald.",
+      playPlaylist: "Playlist laden und abspielen", noPlaylist: "Diese Playlist ist bald verfügbar.", months: ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],
       watch: "Auf YouTube ansehen",
       noReel: "Das Showreel ist hier bald zu sehen.",
       series: "SERIE", shutter: "VERSCHLUSS · MECH.",
@@ -105,8 +111,71 @@
     return;
   }
 
-  /* Only the home page needs content */
-  if (!document.getElementById("photo-grid")) return;
+  var albumBase = lang === "de" ? "/de/album/" : "/album/";
+  function dateLabel(d) {
+    var m = /^(\d{4})-(\d{2})/.exec(d || "");
+    return m ? L.months[+m[2] - 1] + " " + m[1] : (d || "");
+  }
+  function specsOf(ph, fallbackCam) {
+    return [ph.camera || fallbackCam, ph.focal, ph.aperture, ph.shutter, ph.iso].filter(Boolean).join(" · ");
+  }
+
+  /* Album page: /album/?a=slug */
+  if (document.querySelector("[data-album-page]")) {
+    // keep the album when switching language
+    document.querySelectorAll('a[href="/album/"], a[href="/de/album/"]').forEach(function (a) { a.href = a.getAttribute("href") + location.search; });
+    var slug = new URLSearchParams(location.search).get("a") || "";
+    getJSON("/content/albums.json").then(function (data) {
+      var al = (data.albums || []).filter(function (x) { return x.slug === slug; })[0];
+      var titleEl = document.getElementById("album-title"), box = document.getElementById("album-photos");
+      if (!al) { titleEl.textContent = L.albumMissing; return; }
+      var title = pick(al, "title");
+      titleEl.textContent = title;
+      document.title = title + " – TRVR GDCHLD Visuals";
+      var photos = al.photos || [];
+      var meta = [L.cats[al.category] || al.category, dateLabel(al.date), al.place, photos.length + " " + (photos.length === 1 ? L.photo : L.photos)].filter(Boolean).join(" · ");
+      document.getElementById("album-meta").textContent = meta;
+      var txt = document.getElementById("album-text"), t = pick(al, "text");
+      if (t) { txt.textContent = t; txt.hidden = false; }
+      box.textContent = "";
+      if (!photos.length) { box.appendChild(el("p", { class: "empty-note", text: L.emptyAlbum })); return; }
+      photos.forEach(function (ph, i) {
+        var specs = specsOf(ph, al.camera);
+        var btn = el("button", { type: "button", class: "album-photo", "aria-label": (ph.caption || title) + " – " + (i + 1) + "/" + photos.length }, [
+          el("img", { src: ph.image, alt: ph.alt || ph.caption || "", loading: i < 4 ? "eager" : "lazy", decoding: "async" })
+        ]);
+        btn.addEventListener("click", function () { openLightbox(i); });
+        box.appendChild(el("figure", { class: "album-item" }, [btn,
+          (ph.caption || specs) ? el("figcaption", null, [ph.caption ? el("b", { text: ph.caption }) : null, specs ? el("span", { text: specs }) : null]) : null]));
+      });
+      // Lightbox
+      var lb = document.getElementById("lightbox"), img = lb.querySelector("img"), cap = lb.querySelector("figcaption"), cur = 0, lastFocus = null;
+      function show(i) {
+        cur = (i + photos.length) % photos.length;
+        var ph = photos[cur];
+        img.src = ph.image; img.alt = ph.alt || ph.caption || "";
+        cap.textContent = [ph.caption, specsOf(ph, al.camera), (cur + 1) + " / " + photos.length].filter(Boolean).join("  ·  ");
+      }
+      function openLightbox(i) { lastFocus = document.activeElement; show(i); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".lb-close").focus(); }
+      function close() { lb.hidden = true; document.body.style.overflow = ""; if (lastFocus) lastFocus.focus(); }
+      lb.querySelector(".lb-close").addEventListener("click", close);
+      lb.querySelector(".lb-prev").addEventListener("click", function () { show(cur - 1); });
+      lb.querySelector(".lb-next").addEventListener("click", function () { show(cur + 1); });
+      lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
+      lb.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") close();
+        else if (e.key === "ArrowLeft") show(cur - 1);
+        else if (e.key === "ArrowRight") show(cur + 1);
+      });
+      var tx = null;
+      lb.addEventListener("touchstart", function (e) { tx = e.touches[0].clientX; }, { passive: true });
+      lb.addEventListener("touchend", function (e) { if (tx === null) return; var dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) show(cur + (dx < 0 ? 1 : -1)); tx = null; });
+    }).catch(function () {});
+    return;
+  }
+
+  /* Only the home page needs the rest */
+  if (!document.getElementById("album-grid")) return;
 
   /* Settings */
   getJSON("/content/settings.json").then(function (s) {
@@ -134,38 +203,42 @@
     if (!btn || !box) return;
     btn.addEventListener("click", function () {
       if (!id) { document.getElementById("reel-note").textContent = L.noReel; return; }
-      var f = el("iframe", {
-        src: "https://www.youtube-nocookie.com/embed/" + id + "?autoplay=1&rel=0",
-        title: "Showreel",
-        allow: "autoplay; encrypted-media; picture-in-picture; fullscreen",
-        allowfullscreen: "",
-        referrerpolicy: "strict-origin-when-cross-origin"
-      });
-      box.appendChild(f);
+      box.appendChild(ytFrame("https://www.youtube-nocookie.com/embed/" + id + "?autoplay=1&rel=0", "Showreel"));
     });
   }
+  function ytFrame(src, title) {
+    return el("iframe", {
+      src: src, title: title,
+      allow: "autoplay; encrypted-media; picture-in-picture; fullscreen",
+      allowfullscreen: "", referrerpolicy: "strict-origin-when-cross-origin"
+    });
+  }
+  function playlistId(u) {
+    var m = String(u || "").match(/[?&]list=([A-Za-z0-9_-]+)/);
+    return m ? m[1] : (/^(PL|UU|OL|FL|LL)[A-Za-z0-9_-]{10,}$/.test(u || "") ? u : "");
+  }
 
-  /* Photos */
-  var grid = document.getElementById("photo-grid");
+  /* Albums */
+  var grid = document.getElementById("album-grid");
   var filterBox = document.getElementById("filters");
-  getJSON("/content/photos.json").then(function (data) {
-    var photos = (data.photos || []);
+  getJSON("/content/albums.json").then(function (data) {
+    var albums = data.albums || [];
     grid.textContent = "";
     var cats = ["all"];
-    photos.forEach(function (ph, i) {
-      if (ph.category && cats.indexOf(ph.category) < 0) cats.push(ph.category);
-      var specs = [ph.camera, ph.focal, ph.aperture, ph.shutter, ph.iso].filter(Boolean).join(" · ");
-      var fig = el("figure", { class: "tile " + (ph.size && ph.size !== "normal" ? ph.size : ""), "data-cat": ph.category || "" });
-      if (ph.image) fig.appendChild(el("img", { src: ph.image, alt: ph.alt || ph.title || "", loading: "lazy", decoding: "async" }));
-      else fig.style.background = TILE_COLORS[i % TILE_COLORS.length];
-      fig.appendChild(el("figcaption", null, [
-        ph.title ? el("b", { text: ph.title }) : null,
-        specs ? el("span", { text: specs }) : null
+    albums.forEach(function (al, i) {
+      if (al.category && cats.indexOf(al.category) < 0) cats.push(al.category);
+      var photos = al.photos || [];
+      var cover = al.cover || (photos[0] && photos[0].image) || "";
+      var thumb = el("div", { class: "album-cover" });
+      if (cover) thumb.appendChild(el("img", { src: cover, alt: "", loading: "lazy", decoding: "async" }));
+      else thumb.style.background = TILE_COLORS[i % TILE_COLORS.length];
+      var meta = [L.cats[al.category] || al.category, dateLabel(al.date), photos.length + " " + (photos.length === 1 ? L.photo : L.photos)].filter(Boolean).join(" · ");
+      grid.appendChild(el("a", { class: "album-card", href: albumBase + "?a=" + encodeURIComponent(al.slug || ""), "data-cat": al.category || "" }, [
+        thumb,
+        el("div", { class: "album-info" }, [el("span", { class: "album-meta", text: meta }), el("b", { text: pick(al, "title") })])
       ]));
-      grid.appendChild(fig);
     });
     var empty = el("p", { class: "empty-note", text: L.noPhotos }); empty.hidden = true; grid.appendChild(empty);
-
     filterBox.textContent = "";
     cats.forEach(function (c) {
       var b = el("button", { type: "button", class: "chip", "aria-pressed": c === "all" ? "true" : "false", text: L.cats[c] || c });
@@ -173,7 +246,7 @@
         filterBox.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
         b.setAttribute("aria-pressed", "true");
         var shown = 0;
-        grid.querySelectorAll(".tile").forEach(function (t) {
+        grid.querySelectorAll(".album-card").forEach(function (t) {
           var on = c === "all" || t.getAttribute("data-cat") === c;
           t.hidden = !on; if (on) shown++;
         });
@@ -183,20 +256,31 @@
     });
   }).catch(function () {});
 
-  /* Motion projects */
-  getJSON("/content/motion.json").then(function (data) {
-    var box = document.getElementById("projects");
+  /* Playlists (YouTube, loaded only after a click) */
+  getJSON("/content/playlists.json").then(function (data) {
+    var box = document.getElementById("playlists");
     box.textContent = "";
-    (data.projects || []).forEach(function (pr, i) {
-      var thumb = el("div", { class: "thumb" });
-      if (pr.image) thumb.appendChild(el("img", { src: pr.image, alt: "", loading: "lazy" }));
+    (data.playlists || []).forEach(function (pl, i) {
+      var id = playlistId(pl.playlist_url), title = pick(pl, "title");
+      var thumb = el("div", { class: "thumb pl-thumb" });
+      if (pl.cover) thumb.appendChild(el("img", { src: pl.cover, alt: "", loading: "lazy" }));
       else thumb.style.background = TILE_COLORS[(i + 3) % TILE_COLORS.length];
-      var link = safeUrl(pr.youtube_url);
+      var play = el("button", { type: "button", class: "pl-play", "aria-label": L.playPlaylist + ": " + title }, []);
+      play.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5l12 7-12 7z"/></svg>';
+      thumb.appendChild(play);
+      var note = el("p", { class: "pl-note", text: "" });
+      play.addEventListener("click", function () {
+        if (!id) { note.textContent = L.noPlaylist; return; }
+        thumb.textContent = "";
+        thumb.appendChild(ytFrame("https://www.youtube-nocookie.com/embed/videoseries?list=" + id + "&autoplay=1&rel=0", title));
+      });
+      var link = id ? "https://www.youtube.com/playlist?list=" + id : "";
       box.appendChild(el("article", { class: "project" }, [
         thumb,
-        pr.tag ? el("div", { class: "tag", text: String(pr.tag).toUpperCase() }) : null,
-        el("h3", { text: pick(pr, "title") }),
-        pick(pr, "text") ? el("p", { text: pick(pr, "text") }) : null,
+        pl.tag ? el("div", { class: "tag", text: String(pl.tag).toUpperCase() }) : null,
+        el("h3", { text: title }),
+        pick(pl, "text") ? el("p", { text: pick(pl, "text") }) : null,
+        note,
         link ? el("a", { href: link, rel: "noopener", target: "_blank", text: L.watch + " →" }) : null
       ]));
     });

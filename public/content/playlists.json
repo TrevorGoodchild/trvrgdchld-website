@@ -1,0 +1,31 @@
+{
+  "playlists": [
+    {
+      "title_en": "[Playlist title]",
+      "title_de": "[Playlist-Titel]",
+      "tag": "Motion · Playlist",
+      "text_en": "[Short description]",
+      "text_de": "[Kurzbeschreibung]",
+      "cover": "",
+      "playlist_url": ""
+    },
+    {
+      "title_en": "Glass UI Card",
+      "title_de": "Glass-UI-Karte",
+      "tag": "UI · Animation",
+      "text_en": "A modular, SaaS-style animation toolkit built as Fusion macros.",
+      "text_de": "Modulares Animations-Toolkit im SaaS-Look als Fusion-Macros.",
+      "cover": "",
+      "playlist_url": ""
+    },
+    {
+      "title_en": "TG Logo Animation",
+      "title_de": "TG Logo-Animation",
+      "tag": "Branding · Reveal",
+      "text_en": "The monogram opens like an aperture.",
+      "text_de": "Das Monogramm öffnet sich wie eine Blende.",
+      "cover": "",
+      "playlist_url": ""
+    }
+  ]
+}

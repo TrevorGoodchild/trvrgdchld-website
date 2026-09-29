@@ -9,34 +9,35 @@ site_url: /
 display_url: /
 logo_url: /assets/img/logo-full.png
 collections:
-- name: fotos
-  label: Fotos
+- name: alben
+  label: Foto-Alben
   editor:
     preview: false
   files:
-  - name: photos
-    label: Fotogalerie
-    file: public/content/photos.json
+  - name: albums
+    label: Alben
+    file: public/content/albums.json
     fields:
-    - name: photos
-      label: Fotos
-      label_singular: Foto
+    - name: albums
+      label: Alben
+      label_singular: Album
       widget: list
-      summary: '{{fields.title}} · {{fields.category}} · {{fields.camera}}'
-      hint: Reihenfolge per Ziehen ändern. Das erste Foto steht oben links.
+      summary: '{{fields.title_de}} · {{fields.category}}'
+      hint: Reihenfolge per Ziehen ändern – das erste Album steht oben links.
       fields:
-      - name: title
-        label: Titel
+      - name: title_de
+        label: Titel (Deutsch)
         widget: string
-      - name: image
-        label: Bild
-        widget: image
-        required: false
-        hint: JPG oder WebP, lange Kante ca. 2000 px, möglichst unter 500 KB.
-      - name: alt
-        label: Bildbeschreibung (für Screenreader)
+      - name: title_en
+        label: Titel (Englisch)
         widget: string
-        required: false
+      - name: slug
+        label: Kurzname für die Adresse
+        widget: string
+        pattern:
+        - ^[a-z0-9-]+$
+        - Nur Kleinbuchstaben, Ziffern und Bindestriche
+        hint: z. B. waldbuehne-berlin-2026 – ergibt …/album/?a=waldbuehne-berlin-2026. Später nicht mehr ändern, sonst funktionieren geteilte Links nicht mehr.
       - name: category
         label: Kategorie
         widget: select
@@ -49,87 +50,125 @@ collections:
           value: landscape
         - label: Produkt
           value: product
-      - name: size
-        label: Kachelgröße
-        widget: select
-        default: normal
-        options:
-        - label: Normal
-          value: normal
-        - label: Groß (2 × 2)
-          value: large
-        - label: Breit (2 × 1)
-          value: wide
-        - label: Hoch (1 × 2)
-          value: tall
+        - label: Event & Konzert
+          value: event
+      - name: date
+        label: Datum
+        widget: datetime
+        required: false
+        date_format: DD.MM.YYYY
+        time_format: false
+        format: YYYY-MM-DD
+        picker_utc: true
+      - name: place
+        label: Ort
+        widget: string
+        required: false
+      - name: cover
+        label: Titelbild
+        widget: image
+        required: false
+        hint: Leer lassen = erstes Foto des Albums. JPG, lange Kante ca. 2000 px, möglichst unter 500 KB. Handyfotos vorher verkleinern (z. B. mit squoosh.app).
+      - name: text_de
+        label: Beschreibung (Deutsch)
+        widget: text
+        required: false
+      - name: text_en
+        label: Beschreibung (Englisch)
+        widget: text
+        required: false
       - name: camera
-        label: Kamera
+        label: Kamera (für alle Fotos)
         widget: string
         required: false
         default: LUMIX G70
-        hint: z. B. LUMIX G70 – bei Handyfotos das Modell, etwa „iPhone 15 Pro“. Leer lassen, wenn nichts angezeigt werden soll.
-      - name: focal
-        label: Brennweite
-        widget: string
-        required: false
-        hint: z. B. 25 mm
-      - name: aperture
-        label: Blende
-        widget: string
-        required: false
-        hint: z. B. f/5.6
-      - name: shutter
-        label: Verschlusszeit
-        widget: string
-        required: false
-        hint: z. B. 1/250 s
-      - name: iso
-        label: ISO
-        widget: string
-        required: false
-        hint: z. B. ISO 200
-- name: motion
-  label: Motion-Projekte
+        hint: z. B. LUMIX G70 oder Samsung Galaxy A52s. Kann pro Foto überschrieben werden.
+      - name: photos
+        label: Fotos
+        label_singular: Foto
+        widget: list
+        summary: '{{fields.caption}} {{fields.image}}'
+        fields:
+        - name: image
+          label: Bild
+          widget: image
+          hint: JPG, lange Kante ca. 2000 px, möglichst unter 500 KB. Handyfotos vorher verkleinern (z. B. mit squoosh.app).
+        - name: caption
+          label: Bildunterschrift
+          widget: string
+          required: false
+        - name: alt
+          label: Bildbeschreibung (für Screenreader)
+          widget: string
+          required: false
+        - name: camera
+          label: Kamera (nur falls abweichend)
+          widget: string
+          required: false
+        - name: focal
+          label: Brennweite
+          widget: string
+          required: false
+          hint: z. B. 25 mm
+        - name: aperture
+          label: Blende
+          widget: string
+          required: false
+          hint: z. B. f/5.6
+        - name: shutter
+          label: Verschlusszeit
+          widget: string
+          required: false
+          hint: z. B. 1/250 s
+        - name: iso
+          label: ISO
+          widget: string
+          required: false
+          hint: z. B. ISO 200
+- name: playlists
+  label: Motion-Playlists
   editor:
     preview: false
   files:
-  - name: motion
-    label: Projekte
-    file: public/content/motion.json
+  - name: playlists
+    label: Playlists
+    file: public/content/playlists.json
     fields:
-    - name: projects
-      label: Projekte
-      label_singular: Projekt
+    - name: playlists
+      label: Playlists
+      label_singular: Playlist
       widget: list
       summary: '{{fields.title_de}}'
       fields:
-      - name: title_en
-        label: Titel (Englisch)
-        widget: string
       - name: title_de
         label: Titel (Deutsch)
+        widget: string
+      - name: title_en
+        label: Titel (Englisch)
         widget: string
       - name: tag
         label: Kategorie-Zeile
         widget: string
-        hint: z. B. UI · Animation
-      - name: text_en
-        label: Kurzbeschreibung (Englisch)
-        widget: text
         required: false
+        hint: z. B. UI · Animation
       - name: text_de
         label: Kurzbeschreibung (Deutsch)
         widget: text
         required: false
-      - name: image
+      - name: text_en
+        label: Kurzbeschreibung (Englisch)
+        widget: text
+        required: false
+      - name: playlist_url
+        label: YouTube-Playlist-Link
+        widget: string
+        required: false
+        hint: Auf YouTube die Playlist öffnen → Teilen → Link kopieren (enthält „list=…“).
+      - name: cover
         label: Vorschaubild
         widget: image
         required: false
-      - name: youtube_url
-        label: YouTube-Link
-        widget: string
-        required: false
-        hint: Vollständiger Link, z. B. https://www.youtube.com/watch?v=… – öffnet sich in neuem Tab.
+        hint: Eigenes Bild hochladen. YouTube-Vorschaubilder werden aus Datenschutzgründen nicht automatisch geladen.
 - name: labor
   label: Labor
   editor:

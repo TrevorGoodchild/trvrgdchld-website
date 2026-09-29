@@ -38,15 +38,17 @@ Der Login läuft über dein GitHub-Konto. Dafür braucht es eine „OAuth App“
 
 ## 3. Inhalte pflegen
 
-Unter `/admin` gibt es fünf Bereiche:
+Unter `/admin` gibt es diese Bereiche:
 
 | Bereich | Was du dort änderst |
 |---|---|
-| **Fotos** | Bilder hochladen, Titel, Kategorie, Kachelgröße, Kamera (z. B. LUMIX G70 oder Smartphone-Modell), Aufnahmedaten (Brennweite, Blende, Zeit, ISO) |
-| **Motion-Projekte** | Titel und Texte (EN/DE), Vorschaubild, YouTube-Link |
+| **Foto-Alben** | Alben anlegen (Titel DE/EN, Kurzname für die Adresse, Kategorie, Datum, Ort, Titelbild, Beschreibung, Kamera) und darin Fotos mit Bildunterschrift und Aufnahmedaten |
+| **Motion-Playlists** | YouTube-Playlists mit Titel, Text und eigenem Vorschaubild |
 | **Labor** | Die Vorhaltekarten der aktuellen Testreihe |
 | **Rechtliches** | Deine Angaben fürs Impressum, weitere Impressum-Abschnitte, Datenschutzerklärung (DE/EN) |
 | **Einstellungen** | Name, E-Mail, Ort, „Verfügbar ab“, Portraitfoto, Über-mich-Text (EN/DE), Showreel, Social-Media-Links |
+
+Jedes Album hat eine eigene Seite: `/album/?a=<kurzname>` (Deutsch: `/de/album/?a=<kurzname>`).
 
 Nach dem **Veröffentlichen** im CMS ist die Änderung nach ca. einer Minute live.
 
