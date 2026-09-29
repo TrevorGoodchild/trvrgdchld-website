@@ -54,7 +54,7 @@ T = {
         "hero_eyebrow": "Photography · Motion graphics · ", "city_key": "city",
         "hero_h1": 'Hold the light.<br>Shape the<br><em>motion.</em>',
         "hero_p": "Stills and motion graphics from a single studio – from the first test series to the finished clip.",
-        "view_work": "View work", "est": "EST.", "logo_alt": "TG monogram",
+        "view_work": "View work", "est": "EST.", "logo_alt": "TRVR GDCHLD Visuals logo",
         "specs": [("CAMERA", "LUMIX G70"), ("LENS", "14–42 mm · f/3.5–5.6"), ("MOTION", "DaVinci Resolve · Fusion")],
         "available": "AVAILABLE",
         "work_eyebrow": "01 — Photography", "work_h2": "Selected work", "filter_label": "Filter by category",
@@ -79,7 +79,7 @@ T = {
         "hero_eyebrow": "Fotografie · Motion Graphics · ", "city_key": "city",
         "hero_h1": 'Licht halten.<br>Bewegung<br><em>gestalten.</em>',
         "hero_p": "Stille Bilder und bewegte Grafik aus einer Hand – von der ersten Testreihe bis zum fertigen Motion-Clip.",
-        "view_work": "Arbeiten ansehen", "est": "SEIT", "logo_alt": "TG-Monogramm",
+        "view_work": "Arbeiten ansehen", "est": "SEIT", "logo_alt": "Logo TRVR GDCHLD Visuals",
         "specs": [("KAMERA", "LUMIX G70"), ("OBJEKTIV", "14–42 mm · f/3.5–5.6"), ("MOTION", "DaVinci Resolve · Fusion")],
         "available": "VERFÜGBAR",
         "work_eyebrow": "01 — Fotografie", "work_h2": "Ausgewählte Bilder", "filter_label": "Nach Kategorie filtern",
@@ -139,7 +139,7 @@ def header(lang, page, alt_page):
     return f"""<a class="skip" href="#main">{t['skip']}</a>
 <header class="site-header">
 <div class="wrap">
-<a class="brand" href="{home}"><img src="/assets/img/logo.png" alt="" width="58" height="40"><span class="brand-name"><b>TRVR GDCHLD</b><span>VISUALS</span></span></a>
+<a class="brand" href="{home}"><span class="brand-plate"><img src="/assets/img/logo-mark.png" alt="" width="170" height="120"></span><span class="brand-name"><b>TRVR GDCHLD</b><span>VISUALS</span></span></a>
 <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="{t['menu']}">{ICON['menu']}</button>
 <nav class="nav" id="nav" aria-label="{t['nav_label']}">
 {links}
@@ -201,7 +201,7 @@ def home(lang):
 </div>
 </div>
 <div class="hero-mark">
-<img src="/assets/img/logo.png" alt="{t['logo_alt']}" width="640" height="442">
+<div class="logo-plate"><img src="/assets/img/logo-full.png" alt="{t['logo_alt']}" width="720" height="727"></div>
 <span data-hide-empty="established">{t['est']} <span data-set="established"></span></span>
 </div>
 </div>

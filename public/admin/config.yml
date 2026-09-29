@@ -7,7 +7,7 @@ media_folder: public/assets/uploads
 public_folder: /assets/uploads
 site_url: /
 display_url: /
-logo_url: /assets/img/logo.png
+logo_url: /assets/img/logo-full.png
 
 collections:
   - name: fotos
