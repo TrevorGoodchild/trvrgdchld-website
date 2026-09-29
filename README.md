@@ -38,13 +38,14 @@ Der Login läuft über dein GitHub-Konto. Dafür braucht es eine „OAuth App“
 
 ## 3. Inhalte pflegen
 
-Unter `/admin` gibt es vier Bereiche:
+Unter `/admin` gibt es fünf Bereiche:
 
 | Bereich | Was du dort änderst |
 |---|---|
-| **Fotos** | Bilder hochladen, Titel, Kategorie, Kachelgröße, Aufnahmedaten (Brennweite, Blende, Zeit, ISO) |
+| **Fotos** | Bilder hochladen, Titel, Kategorie, Kachelgröße, Kamera (z. B. LUMIX G70 oder Smartphone-Modell), Aufnahmedaten (Brennweite, Blende, Zeit, ISO) |
 | **Motion-Projekte** | Titel und Texte (EN/DE), Vorschaubild, YouTube-Link |
 | **Labor** | Die Vorhaltekarten der aktuellen Testreihe |
+| **Rechtliches** | Deine Angaben fürs Impressum, weitere Impressum-Abschnitte, Datenschutzerklärung (DE/EN) |
 | **Einstellungen** | Name, E-Mail, Ort, „Verfügbar ab“, Portraitfoto, Über-mich-Text (EN/DE), Showreel, Social-Media-Links |
 
 Nach dem **Veröffentlichen** im CMS ist die Änderung nach ca. einer Minute live.
@@ -53,9 +54,11 @@ Nach dem **Veröffentlichen** im CMS ist die Änderung nach ca. einer Minute liv
 
 ## 4. Was nicht im CMS steht
 
-Feste Texte, die Praxis-/Guide-Seite sowie **Impressum und Datenschutz** werden aus `tools/build.py` erzeugt.
-Die Angaben fürs Impressum (Name, Anschrift, Telefon, E-Mail, ggf. USt-IdNr.) stehen oben in dieser Datei unter `LEGAL`.
+Feste Texte der Seiten und die Praxis-/Guide-Seite werden aus `tools/build.py` erzeugt.
 Nach einer Änderung: `python3 tools/build.py` ausführen – die Seiten landen in `public/` – und hochladen.
+
+Impressum und Datenschutz stehen in `public/content/legal.json` und werden im CMS unter **Rechtliches** gepflegt.
+Die Seiten laden die Texte beim Aufruf von dort; `tools/build.py` erzeugt zusätzlich eine statische Fassung.
 
 ## Aufbau
 

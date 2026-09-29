@@ -1,0 +1,163 @@
+{
+  "operator": {
+    "name": "Trevor Goodchild",
+    "business": "TRVR GDCHLD Visuals",
+    "street": "[Straße Hausnummer]",
+    "city": "[PLZ] Kupferzell",
+    "phone": "[Telefonnummer]",
+    "email": "trevorgoodchild1979@gmail.com",
+    "vat_id": ""
+  },
+  "impressum_de": {
+    "sections": [
+      {
+        "title": "Verbraucherstreitbeilegung",
+        "anchor": "",
+        "style": "",
+        "text": "Ich bin nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen."
+      },
+      {
+        "title": "Haftung für Inhalte und Links",
+        "anchor": "",
+        "style": "",
+        "text": "Die Inhalte dieser Seiten wurden mit Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte kann ich jedoch keine Gewähr übernehmen. Diese Website enthält Links zu externen Websites Dritter, auf deren Inhalte ich keinen Einfluss habe. Für diese fremden Inhalte ist stets der jeweilige Anbieter oder Betreiber verantwortlich. Werden mir Rechtsverletzungen bekannt, entferne ich entsprechende Inhalte oder Links umgehend."
+      },
+      {
+        "title": "Urheberrecht",
+        "anchor": "",
+        "style": "",
+        "text": "Alle Fotografien, Videos, Animationen, Grafiken und Texte auf dieser Website sind urheberrechtlich geschützt. Jede Vervielfältigung, Bearbeitung, Verbreitung oder sonstige Verwertung außerhalb der Grenzen des Urheberrechts bedarf meiner vorherigen schriftlichen Zustimmung. Anfragen zur Lizenzierung richten Sie bitte an die oben genannte E-Mail-Adresse."
+      }
+    ]
+  },
+  "imprint_en": {
+    "sections": [
+      {
+        "title": "Consumer dispute resolution",
+        "anchor": "",
+        "style": "",
+        "text": "I am neither willing nor obliged to take part in dispute resolution proceedings before a consumer arbitration board."
+      },
+      {
+        "title": "Liability for content and links",
+        "anchor": "",
+        "style": "",
+        "text": "The content of these pages has been created with care. However, I cannot guarantee that it is accurate, complete or up to date. This website contains links to external third-party websites whose content I have no control over. The respective provider or operator is always responsible for that content. If I become aware of any legal violations, I will remove the content or links concerned immediately."
+      },
+      {
+        "title": "Copyright",
+        "anchor": "",
+        "style": "",
+        "text": "All photographs, videos, animations, graphics and texts on this website are protected by copyright. Any reproduction, editing, distribution or other use beyond the limits of copyright law requires my prior written consent. Please send licensing requests to the email address above."
+      }
+    ]
+  },
+  "datenschutz_de": {
+    "updated": "September 2026",
+    "intro": "Diese Website ist bewusst schlank gebaut: keine Cookies, keine Analyse- oder Tracking-Tools, keine Werbung. Personenbezogene Daten werden nur verarbeitet, soweit das für den Betrieb der Seite technisch nötig ist oder Sie mich von sich aus kontaktieren.",
+    "sections": [
+      {
+        "title": "Hosting und Server-Logfiles",
+        "anchor": "",
+        "style": "",
+        "text": "Diese Website wird bei Cloudflare, Inc., 101 Townsend St., San Francisco, CA 94107, USA gehostet und über deren Netzwerk ausgeliefert. Beim Aufruf der Seite werden automatisch technische Daten verarbeitet, die Ihr Browser übermittelt: IP-Adresse, Datum und Uhrzeit des Zugriffs, aufgerufene Seite, zuvor besuchte Seite (Referrer) sowie Browsertyp und Betriebssystem.\n\nDiese Daten sind nötig, um die Website auszuliefern und vor Angriffen zu schützen. Rechtsgrundlage ist mein berechtigtes Interesse an einem sicheren und stabilen Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Mit Cloudflare besteht ein Vertrag zur Auftragsverarbeitung. Cloudflare ist unter dem EU-US Data Privacy Framework zertifiziert; die Übermittlung in die USA stützt sich auf den Angemessenheitsbeschluss der EU-Kommission (Art. 45 DSGVO). Weitere Informationen: cloudflare.com/privacypolicy."
+      },
+      {
+        "title": "Verschlüsselung",
+        "anchor": "",
+        "style": "",
+        "text": "Diese Seite nutzt aus Sicherheitsgründen eine SSL- bzw. TLS-Verschlüsselung. Eine verschlüsselte Verbindung erkennen Sie an „https://“ und dem Schloss-Symbol in der Adresszeile Ihres Browsers."
+      },
+      {
+        "title": "Schriftarten",
+        "anchor": "",
+        "style": "",
+        "text": "Die auf dieser Website verwendeten Schriftarten sind lokal auf dem Server eingebunden. Beim Laden der Seite wird keine Verbindung zu Servern von Google oder anderen Schriftanbietern hergestellt."
+      },
+      {
+        "title": "Kontakt per E-Mail",
+        "anchor": "",
+        "style": "",
+        "text": "Wenn Sie mir eine E-Mail schreiben, verarbeite ich die darin enthaltenen Angaben (z. B. Name, E-Mail-Adresse, Inhalt Ihrer Anfrage), um Ihr Anliegen zu bearbeiten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, wenn Ihre Anfrage mit einem Auftrag zusammenhängt, ansonsten mein berechtigtes Interesse an der Beantwortung (Art. 6 Abs. 1 lit. f DSGVO). Ihre Daten werden gelöscht, sobald Ihre Anfrage erledigt ist, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen."
+      },
+      {
+        "title": "Eingebettete Videos (YouTube)",
+        "anchor": "youtube",
+        "style": "",
+        "text": "Für mein Showreel binde ich Videos der Plattform YouTube ein. Anbieter ist die Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Ich nutze dabei den erweiterten Datenschutzmodus (youtube-nocookie.com). Die Videos werden erst geladen, wenn Sie aktiv auf das Video klicken. Vorher werden keine Daten an YouTube übertragen.\n\nNach Ihrem Klick wird eine Verbindung zu den Servern von YouTube hergestellt. Dabei werden unter anderem Ihre IP-Adresse und Informationen zu Ihrem Gerät übermittelt, und YouTube kann Cookies oder vergleichbare Technologien einsetzen. Eine Übermittlung an die Google LLC in den USA ist möglich; Google LLC ist unter dem EU-US Data Privacy Framework zertifiziert. Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG), die Sie jederzeit mit Wirkung für die Zukunft widerrufen können. Weitere Informationen: policies.google.com/privacy."
+      },
+      {
+        "title": "Links zu sozialen Netzwerken",
+        "anchor": "",
+        "style": "",
+        "text": "Auf dieser Website befinden sich einfache Links zu meinen Profilen bei YouTube, Instagram und Pinterest. Es handelt sich nicht um eingebettete Plugins: Solange Sie einen Link nicht anklicken, werden keine Daten an die jeweilige Plattform übertragen. Nach dem Klick gilt die Datenschutzerklärung des jeweiligen Anbieters:\n\nYouTube: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland\nInstagram: Meta Platforms Ireland Limited, Merrion Road, Dublin 4, D04 X2K5, Irland\nPinterest: Pinterest Europe Ltd., Palmerston House, 2nd Floor, Fenian Street, Dublin 2, Irland"
+      },
+      {
+        "title": "Ihre Rechte",
+        "anchor": "",
+        "style": "",
+        "text": "Sie haben jederzeit das Recht auf Auskunft über Ihre gespeicherten Daten (Art. 15 DSGVO), auf Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18) und Datenübertragbarkeit (Art. 20). Eine erteilte Einwilligung können Sie jederzeit widerrufen (Art. 7 Abs. 3 DSGVO). Wenden Sie sich dafür einfach per E-Mail an mich.\n\nAußerdem haben Sie das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (Art. 77 DSGVO), insbesondere in dem Bundesland oder EU-Staat Ihres Aufenthaltsorts."
+      },
+      {
+        "title": "Widerspruchsrecht",
+        "anchor": "",
+        "style": "outline",
+        "text": "Soweit ich Daten auf Grundlage meines berechtigten Interesses (Art. 6 Abs. 1 lit. f DSGVO) verarbeite, können Sie aus Gründen, die sich aus Ihrer besonderen Situation ergeben, jederzeit Widerspruch gegen diese Verarbeitung einlegen (Art. 21 DSGVO)."
+      }
+    ]
+  },
+  "privacy_en": {
+    "updated": "September 2026",
+    "intro": "This website is deliberately lean: no cookies, no analytics or tracking tools, no advertising. Personal data is only processed where this is technically necessary to run the site or when you contact me yourself.",
+    "sections": [
+      {
+        "title": "Hosting and server log files",
+        "anchor": "",
+        "style": "",
+        "text": "This website is hosted by Cloudflare, Inc., 101 Townsend St., San Francisco, CA 94107, USA, and delivered through its network. When you visit the site, technical data sent by your browser is processed automatically: IP address, date and time of access, the page requested, the previously visited page (referrer), and browser type and operating system.\n\nThis data is needed to deliver the website and protect it against attacks. The legal basis is my legitimate interest in secure and stable operation (Art. 6(1)(f) GDPR). A data processing agreement is in place with Cloudflare. Cloudflare is certified under the EU-U.S. Data Privacy Framework; transfers to the USA are based on the European Commission’s adequacy decision (Art. 45 GDPR). More information: cloudflare.com/privacypolicy."
+      },
+      {
+        "title": "Encryption",
+        "anchor": "",
+        "style": "",
+        "text": "For security reasons, this site uses SSL/TLS encryption. You can recognise an encrypted connection by “https://” and the padlock symbol in your browser’s address bar."
+      },
+      {
+        "title": "Fonts",
+        "anchor": "",
+        "style": "",
+        "text": "The fonts used on this website are hosted locally on the server. No connection to Google or any other font provider is made when the page loads."
+      },
+      {
+        "title": "Contact by email",
+        "anchor": "",
+        "style": "",
+        "text": "If you email me, I process the information it contains (e.g. name, email address, content of your enquiry) to handle your request. The legal basis is Art. 6(1)(b) GDPR where your enquiry relates to a commission, and otherwise my legitimate interest in replying (Art. 6(1)(f) GDPR). Your data is deleted once your enquiry has been dealt with, unless statutory retention obligations apply."
+      },
+      {
+        "title": "Embedded videos (YouTube)",
+        "anchor": "youtube",
+        "style": "",
+        "text": "For my showreel I embed videos from YouTube. The provider is Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland. I use YouTube’s privacy-enhanced mode (youtube-nocookie.com). Videos are only loaded once you actively click on them. Before that, no data is transferred to YouTube.\n\nAfter your click, a connection to YouTube’s servers is established. Among other things, your IP address and information about your device are transmitted, and YouTube may use cookies or similar technologies. Data may be transferred to Google LLC in the USA; Google LLC is certified under the EU-U.S. Data Privacy Framework. The legal basis is your consent (Art. 6(1)(a) GDPR, § 25(1) TDDDG), which you can withdraw at any time with effect for the future. More information: policies.google.com/privacy."
+      },
+      {
+        "title": "Links to social networks",
+        "anchor": "",
+        "style": "",
+        "text": "This website contains simple links to my profiles on YouTube, Instagram and Pinterest. These are not embedded plugins: as long as you do not click a link, no data is transferred to the respective platform. After clicking, the privacy policy of the respective provider applies:\n\nYouTube: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland\nInstagram: Meta Platforms Ireland Limited, Merrion Road, Dublin 4, D04 X2K5, Ireland\nPinterest: Pinterest Europe Ltd., Palmerston House, 2nd Floor, Fenian Street, Dublin 2, Ireland"
+      },
+      {
+        "title": "Your rights",
+        "anchor": "",
+        "style": "",
+        "text": "You have the right at any time to access your stored data (Art. 15 GDPR), and to rectification (Art. 16), erasure (Art. 17), restriction of processing (Art. 18) and data portability (Art. 20). You can withdraw any consent you have given at any time (Art. 7(3) GDPR). Simply contact me by email.\n\nYou also have the right to lodge a complaint with a data protection supervisory authority (Art. 77 GDPR), in particular in the EU member state or German federal state where you live."
+      },
+      {
+        "title": "Right to object",
+        "anchor": "",
+        "style": "outline",
+        "text": "Where I process data on the basis of my legitimate interest (Art. 6(1)(f) GDPR), you may object to this processing at any time on grounds relating to your particular situation (Art. 21 GDPR)."
+      }
+    ]
+  }
+}

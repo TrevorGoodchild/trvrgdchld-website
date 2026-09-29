@@ -1,10 +1,10 @@
 {
   "photos": [
-    { "title": "[Project title]", "category": "portrait", "image": "", "size": "large", "focal": "25 mm", "aperture": "f/5.6", "shutter": "1/250 s", "iso": "ISO 200" },
-    { "title": "[Project title]", "category": "street", "image": "", "size": "normal", "focal": "42 mm", "aperture": "f/5.6", "shutter": "", "iso": "" },
-    { "title": "[Project title]", "category": "landscape", "image": "", "size": "normal", "focal": "14 mm", "aperture": "f/8", "shutter": "", "iso": "" },
-    { "title": "[Project title]", "category": "product", "image": "", "size": "normal", "focal": "", "aperture": "", "shutter": "", "iso": "" },
-    { "title": "[Project title]", "category": "portrait", "image": "", "size": "normal", "focal": "", "aperture": "", "shutter": "", "iso": "" },
-    { "title": "[Project title]", "category": "landscape", "image": "", "size": "normal", "focal": "", "aperture": "", "shutter": "", "iso": "" }
+    {"title": "[Project title]", "category": "portrait", "image": "", "size": "large", "camera": "LUMIX G70", "focal": "25 mm", "aperture": "f/5.6", "shutter": "1/250 s", "iso": "ISO 200"},
+    {"title": "[Project title]", "category": "street", "image": "", "size": "normal", "camera": "LUMIX G70", "focal": "42 mm", "aperture": "f/5.6", "shutter": "", "iso": ""},
+    {"title": "[Project title]", "category": "landscape", "image": "", "size": "normal", "camera": "LUMIX G70", "focal": "14 mm", "aperture": "f/8", "shutter": "", "iso": ""},
+    {"title": "[Project title]", "category": "product", "image": "", "size": "normal", "camera": "LUMIX G70", "focal": "", "aperture": "", "shutter": "", "iso": ""},
+    {"title": "[Project title]", "category": "portrait", "image": "", "size": "normal", "camera": "LUMIX G70", "focal": "", "aperture": "", "shutter": "", "iso": ""},
+    {"title": "[Project title]", "category": "landscape", "image": "", "size": "normal", "camera": "LUMIX G70", "focal": "", "aperture": "", "shutter": "", "iso": ""}
   ]
 }

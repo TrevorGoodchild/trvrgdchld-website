@@ -66,6 +66,45 @@
     });
   }
 
+  /* Legal pages: refresh from /content/legal.json (edited in the CMS).
+     Must match legal_sections() in tools/build.py. */
+  var legalBox = document.querySelector("[data-legal]");
+  if (legalBox) {
+    getJSON("/content/legal.json").then(function (data) {
+      var kind = legalBox.getAttribute("data-legal"), doc = data[kind], op = data.operator || {};
+      if (!doc) return;
+      var de = /_de$/.test(kind), country = de ? "Deutschland" : "Germany";
+      var parts = [];
+      function sec(title, text, style, anchor) {
+        var s = el("section", { class: style || null, id: anchor || null }, [el("h2", { text: title })]);
+        String(text || "").split("\n\n").forEach(function (p) {
+          if (p.trim()) s.appendChild(el("p", { class: "lines", text: p.trim() }));
+        });
+        parts.push(s);
+      }
+      var list = doc.sections || [];
+      if (kind === "impressum_de" || kind === "imprint_en") {
+        sec(de ? "Angaben gemäß § 5 DDG" : "Information pursuant to § 5 DDG (German Digital Services Act)",
+          [op.name, op.business, op.street, op.city, country].filter(Boolean).join("\n"), "box");
+        sec(de ? "Kontakt" : "Contact", (de ? "Telefon: " : "Phone: ") + (op.phone || "") + "\n" + (de ? "E-Mail: " : "Email: ") + (op.email || ""));
+        if (op.vat_id) sec(de ? "Umsatzsteuer-ID" : "VAT ID", (de ? "Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: " : "VAT identification number pursuant to § 27a of the German VAT Act (UStG): ") + op.vat_id);
+        list.forEach(function (x) { sec(x.title || "", x.text, x.style, x.anchor); });
+      } else {
+        sec("1. " + (de ? "Verantwortlicher" : "Controller"),
+          [op.name, op.business, [op.street, op.city, country].filter(Boolean).join(", "), (de ? "E-Mail: " : "Email: ") + (op.email || "")].filter(Boolean).join("\n"), "box");
+        list.forEach(function (x, i) { sec((i + 2) + ". " + (x.title || ""), x.text, x.style, x.anchor); });
+      }
+      var upd = document.querySelector("[data-legal-updated]");
+      if (upd) upd.textContent = doc.updated ? upd.getAttribute("data-prefix") + doc.updated : "";
+      var intro = document.querySelector("[data-legal-intro]");
+      if (intro) { intro.textContent = doc.intro || ""; intro.hidden = !doc.intro; }
+      legalBox.textContent = "";
+      parts.forEach(function (n) { legalBox.appendChild(n); });
+      if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+    }).catch(function () {});
+    return;
+  }
+
   /* Only the home page needs content */
   if (!document.getElementById("photo-grid")) return;
 
@@ -115,7 +154,7 @@
     var cats = ["all"];
     photos.forEach(function (ph, i) {
       if (ph.category && cats.indexOf(ph.category) < 0) cats.push(ph.category);
-      var specs = [ph.focal, ph.aperture, ph.shutter, ph.iso].filter(Boolean).join(" · ");
+      var specs = [ph.camera, ph.focal, ph.aperture, ph.shutter, ph.iso].filter(Boolean).join(" · ");
       var fig = el("figure", { class: "tile " + (ph.size && ph.size !== "normal" ? ph.size : ""), "data-cat": ph.category || "" });
       if (ph.image) fig.appendChild(el("img", { src: ph.image, alt: ph.alt || ph.title || "", loading: "lazy", decoding: "async" }));
       else fig.style.background = TILE_COLORS[i % TILE_COLORS.length];

@@ -14,15 +14,11 @@ ROOT = Path(__file__).resolve().parent.parent / "public"
 SITE = "TRVR GDCHLD Visuals"
 
 # ---------------------------------------------------------------- Rechtliche Angaben
-# Hier eintragen und das Skript neu ausführen.
-LEGAL = {
-    "name": "[Vorname Nachname]",
-    "street": "[Straße Hausnummer]",
-    "city": "[PLZ Ort]",
-    "phone": "[Telefonnummer]",
-    "email": "[deine@mail.de]",
-    "vat_id": "",  # leer lassen, wenn keine USt-IdNr. vorhanden ist
-}
+# Impressum und Datenschutz stehen in public/content/legal.json (im CMS unter
+# "Rechtliches" bearbeitbar). Die Seiten werden hier vorab erzeugt und im
+# Browser zusätzlich aus legal.json aktualisiert (assets/js/main.js).
+import json
+LEGAL_FILE = ROOT / "content" / "legal.json"
 
 # ---------------------------------------------------------------- Routen
 URL = {
@@ -455,90 +451,75 @@ def guide(lang):
 
 
 # ---------------------------------------------------------------- Rechtstexte
-def lines(*xs):
-    return "\n".join(x for x in xs if x)
+LEGAL_META = {
+    "impressum_de": {"lang": "de", "eyebrow": "Rechtliches", "h1": "Impressum", "numbered": False,
+                     "note": ""},
+    "imprint_en": {"lang": "en", "eyebrow": "Legal", "h1": "Legal Notice", "numbered": False,
+                   "note": 'This is an English translation of the German <a href="/de/impressum/" lang="de">Impressum</a>. In case of any discrepancy, the German version prevails.'},
+    "datenschutz_de": {"lang": "de", "eyebrow": "Rechtliches", "h1": "Datenschutz", "numbered": True, "note": ""},
+    "privacy_en": {"lang": "en", "eyebrow": "Legal", "h1": "Privacy Policy", "numbered": True,
+                   "note": 'This is an English translation of the German <a href="/de/datenschutz/" lang="de">Datenschutzerklärung</a>. In case of any discrepancy, the German version prevails.'},
+}
 
 
-def legal_page(lang, page, body_html, title, desc):
-    t = T[lang]
+def legal_sections(kind, data):
+    """Erzeugt die Abschnitte – muss zu renderLegal() in main.js passen."""
+    op = data["operator"]
+    de = kind.endswith("_de")
+    doc = data[kind]
+    country = "Deutschland" if de else "Germany"
+    addr = "\n".join(x for x in [op.get("name"), op.get("business"), op.get("street"), op.get("city"), country] if x)
+    out = []
+
+    def sec(title, text, style="", anchor=""):
+        paras = "".join(f'<p class="lines">{esc(p.strip())}</p>' for p in str(text or "").split("\n\n") if p.strip())
+        cls = f' class="{esc(style)}"' if style else ""
+        aid = f' id="{esc(anchor)}"' if anchor else ""
+        out.append(f"<section{cls}{aid}><h2>{esc(title)}</h2>{paras}</section>")
+
+    if kind in ("impressum_de", "imprint_en"):
+        sec("Angaben gemäß § 5 DDG" if de else "Information pursuant to § 5 DDG (German Digital Services Act)", addr, "box")
+        sec("Kontakt" if de else "Contact",
+            ("Telefon: " if de else "Phone: ") + (op.get("phone") or "") + "\n" + ("E-Mail: " if de else "Email: ") + (op.get("email") or ""))
+        if op.get("vat_id"):
+            sec("Umsatzsteuer-ID" if de else "VAT ID",
+                ("Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: " if de else "VAT identification number pursuant to § 27a of the German VAT Act (UStG): ") + op["vat_id"])
+        for x in doc.get("sections", []):
+            sec(x.get("title", ""), x.get("text", ""), x.get("style", ""), x.get("anchor", ""))
+    else:
+        resp = "\n".join(x for x in [op.get("name"), op.get("business"), ", ".join(y for y in [op.get("street"), op.get("city"), country] if y), ("E-Mail: " if de else "Email: ") + (op.get("email") or "")] if x)
+        sec("1. " + ("Verantwortlicher" if de else "Controller"), resp, "box")
+        for n, x in enumerate(doc.get("sections", []), 2):
+            sec(f"{n}. {x.get('title', '')}", x.get("text", ""), x.get("style", ""), x.get("anchor", ""))
+    return "\n".join(out)
+
+
+def legal_body(kind):
+    data = json.loads(LEGAL_FILE.read_text(encoding="utf-8"))
+    m, doc = LEGAL_META[kind], data[kind]
+    de = m["lang"] == "de"
+    updated = doc.get("updated")
+    upd = f" · {'Stand' if de else 'As of'} {esc(updated)}" if updated else ""
+    eyebrow = f'{m["eyebrow"]}<span data-legal-updated data-prefix=" · {"Stand" if de else "As of"} ">{upd}</span>'
+    hidden = "" if doc.get("intro") else " hidden"
+    intro = f'<p class="lead" data-legal-intro{hidden}>{esc(doc.get("intro", ""))}</p>'
+    note = f'<p class="note">{m["note"]}</p>' if m["note"] else ""
+    return f"""<div><div class="eyebrow">{eyebrow}</div><h1>{m['h1']}</h1>{intro}{note}</div>
+<div class="legal-body" data-legal="{kind}">
+{legal_sections(kind, data)}
+</div>"""
+
+
+def legal_page(lang, page, kind, title, desc):
     return head(lang, f"{title} – {SITE}", desc, page, page) + header(lang, page, page) + f"""<main id="main" class="wrap">
 <div class="legal">
-{body_html}
+{legal_body(kind)}
 </div>
 </main>
 <div class="plain-footer"><div class="wrap">{footer_links(lang, page, page)}</div></div>
 {YEAR_JS}</body>
 </html>
 """
-
-
-def impressum():
-    L = LEGAL
-    vat = f"""<section><h2>Umsatzsteuer-ID</h2><p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: {esc(L['vat_id'])}</p></section>""" if L["vat_id"] else ""
-    return f"""<div><div class="eyebrow">Rechtliches</div><h1>Impressum</h1></div>
-<section class="box"><h2>Angaben gemäß § 5 DDG</h2><p class="lines">{esc(lines(L['name'], 'TRVR GDCHLD Visuals', L['street'], L['city'], 'Deutschland'))}</p></section>
-<section><h2>Kontakt</h2><p class="lines">Telefon: {esc(L['phone'])}
-E-Mail: {esc(L['email'])}</p></section>
-{vat}
-<section><h2>Verbraucherstreitbeilegung</h2><p>Ich bin nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p></section>
-<section><h2>Haftung für Inhalte und Links</h2><p>Die Inhalte dieser Seiten wurden mit Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte kann ich jedoch keine Gewähr übernehmen. Diese Website enthält Links zu externen Websites Dritter, auf deren Inhalte ich keinen Einfluss habe. Für diese fremden Inhalte ist stets der jeweilige Anbieter oder Betreiber verantwortlich. Werden mir Rechtsverletzungen bekannt, entferne ich entsprechende Inhalte oder Links umgehend.</p></section>
-<section><h2>Urheberrecht</h2><p>Alle Fotografien, Videos, Animationen, Grafiken und Texte auf dieser Website sind urheberrechtlich geschützt. Jede Vervielfältigung, Bearbeitung, Verbreitung oder sonstige Verwertung außerhalb der Grenzen des Urheberrechts bedarf meiner vorherigen schriftlichen Zustimmung. Anfragen zur Lizenzierung richten Sie bitte an die oben genannte E-Mail-Adresse.</p></section>"""
-
-
-def imprint():
-    L = LEGAL
-    vat = f"""<section><h2>VAT ID</h2><p>VAT identification number pursuant to § 27a of the German VAT Act (UStG): {esc(L['vat_id'])}</p></section>""" if L["vat_id"] else ""
-    return f"""<div><div class="eyebrow">Legal</div><h1>Legal Notice</h1><p class="note">This is an English translation of the German <a href="/de/impressum/" lang="de">Impressum</a>. In case of any discrepancy, the German version prevails.</p></div>
-<section class="box"><h2>Information pursuant to § 5 DDG (German Digital Services Act)</h2><p class="lines">{esc(lines(L['name'], 'TRVR GDCHLD Visuals', L['street'], L['city'], 'Germany'))}</p></section>
-<section><h2>Contact</h2><p class="lines">Phone: {esc(L['phone'])}
-Email: {esc(L['email'])}</p></section>
-{vat}
-<section><h2>Consumer dispute resolution</h2><p>I am neither willing nor obliged to take part in dispute resolution proceedings before a consumer arbitration board.</p></section>
-<section><h2>Liability for content and links</h2><p>The content of these pages has been created with care. However, I cannot guarantee that it is accurate, complete or up to date. This website contains links to external third-party websites whose content I have no control over. The respective provider or operator is always responsible for that content. If I become aware of any legal violations, I will remove the content or links concerned immediately.</p></section>
-<section><h2>Copyright</h2><p>All photographs, videos, animations, graphics and texts on this website are protected by copyright. Any reproduction, editing, distribution or other use beyond the limits of copyright law requires my prior written consent. Please send licensing requests to the email address above.</p></section>"""
-
-
-def datenschutz():
-    L = LEGAL
-    return f"""<div><div class="eyebrow">Rechtliches · Stand September 2026</div><h1>Datenschutz</h1>
-<p class="lead">Diese Website ist bewusst schlank gebaut: keine Cookies, keine Analyse- oder Tracking-Tools, keine Werbung. Personenbezogene Daten werden nur verarbeitet, soweit das für den Betrieb der Seite technisch nötig ist oder Sie mich von sich aus kontaktieren.</p></div>
-<section class="box"><h2>1. Verantwortlicher</h2><p class="lines">{esc(lines(L['name'], 'TRVR GDCHLD Visuals', L['street'] + ', ' + L['city'] + ', Deutschland', 'E-Mail: ' + L['email']))}</p></section>
-<section><h2>2. Hosting und Server-Logfiles</h2><p>Diese Website wird bei Cloudflare, Inc., 101 Townsend St., San Francisco, CA 94107, USA gehostet und über deren Netzwerk ausgeliefert. Beim Aufruf der Seite werden automatisch technische Daten verarbeitet, die Ihr Browser übermittelt: IP-Adresse, Datum und Uhrzeit des Zugriffs, aufgerufene Seite, zuvor besuchte Seite (Referrer) sowie Browsertyp und Betriebssystem.</p>
-<p>Diese Daten sind nötig, um die Website auszuliefern und vor Angriffen zu schützen. Rechtsgrundlage ist mein berechtigtes Interesse an einem sicheren und stabilen Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Mit Cloudflare besteht ein Vertrag zur Auftragsverarbeitung. Cloudflare ist unter dem EU-US Data Privacy Framework zertifiziert; die Übermittlung in die USA stützt sich auf den Angemessenheitsbeschluss der EU-Kommission (Art. 45 DSGVO). Weitere Informationen: cloudflare.com/privacypolicy.</p></section>
-<section><h2>3. Verschlüsselung</h2><p>Diese Seite nutzt aus Sicherheitsgründen eine SSL- bzw. TLS-Verschlüsselung. Eine verschlüsselte Verbindung erkennen Sie an „https://“ und dem Schloss-Symbol in der Adresszeile Ihres Browsers.</p></section>
-<section><h2>4. Schriftarten</h2><p>Die auf dieser Website verwendeten Schriftarten sind lokal auf dem Server eingebunden. Beim Laden der Seite wird keine Verbindung zu Servern von Google oder anderen Schriftanbietern hergestellt.</p></section>
-<section><h2>5. Kontakt per E-Mail</h2><p>Wenn Sie mir eine E-Mail schreiben, verarbeite ich die darin enthaltenen Angaben (z. B. Name, E-Mail-Adresse, Inhalt Ihrer Anfrage), um Ihr Anliegen zu bearbeiten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, wenn Ihre Anfrage mit einem Auftrag zusammenhängt, ansonsten mein berechtigtes Interesse an der Beantwortung (Art. 6 Abs. 1 lit. f DSGVO). Ihre Daten werden gelöscht, sobald Ihre Anfrage erledigt ist, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p></section>
-<section id="youtube"><h2>6. Eingebettete Videos (YouTube)</h2><p>Für mein Showreel binde ich Videos der Plattform YouTube ein. Anbieter ist die Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Ich nutze dabei den erweiterten Datenschutzmodus (youtube-nocookie.com). Die Videos werden erst geladen, wenn Sie aktiv auf das Video klicken. Vorher werden keine Daten an YouTube übertragen.</p>
-<p>Nach Ihrem Klick wird eine Verbindung zu den Servern von YouTube hergestellt. Dabei werden unter anderem Ihre IP-Adresse und Informationen zu Ihrem Gerät übermittelt, und YouTube kann Cookies oder vergleichbare Technologien einsetzen. Eine Übermittlung an die Google LLC in den USA ist möglich; Google LLC ist unter dem EU-US Data Privacy Framework zertifiziert. Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG), die Sie jederzeit mit Wirkung für die Zukunft widerrufen können. Weitere Informationen: policies.google.com/privacy.</p></section>
-<section><h2>7. Links zu sozialen Netzwerken</h2><p>Auf dieser Website befinden sich einfache Links zu meinen Profilen bei YouTube, Instagram und Pinterest. Es handelt sich nicht um eingebettete Plugins: Solange Sie einen Link nicht anklicken, werden keine Daten an die jeweilige Plattform übertragen. Nach dem Klick gilt die Datenschutzerklärung des jeweiligen Anbieters:</p>
-<p class="lines">YouTube: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland
-Instagram: Meta Platforms Ireland Limited, Merrion Road, Dublin 4, D04 X2K5, Irland
-Pinterest: Pinterest Europe Ltd., Palmerston House, 2nd Floor, Fenian Street, Dublin 2, Irland</p></section>
-<section><h2>8. Ihre Rechte</h2><p>Sie haben jederzeit das Recht auf Auskunft über Ihre gespeicherten Daten (Art. 15 DSGVO), auf Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18) und Datenübertragbarkeit (Art. 20). Eine erteilte Einwilligung können Sie jederzeit widerrufen (Art. 7 Abs. 3 DSGVO). Wenden Sie sich dafür einfach per E-Mail an mich.</p>
-<p>Außerdem haben Sie das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (Art. 77 DSGVO), insbesondere in dem Bundesland oder EU-Staat Ihres Aufenthaltsorts.</p></section>
-<section class="outline"><h2>9. Widerspruchsrecht</h2><p>Soweit ich Daten auf Grundlage meines berechtigten Interesses (Art. 6 Abs. 1 lit. f DSGVO) verarbeite, können Sie aus Gründen, die sich aus Ihrer besonderen Situation ergeben, jederzeit Widerspruch gegen diese Verarbeitung einlegen (Art. 21 DSGVO).</p></section>"""
-
-
-def privacy():
-    L = LEGAL
-    return f"""<div><div class="eyebrow">Legal · As of September 2026</div><h1>Privacy Policy</h1>
-<p class="lead">This website is deliberately lean: no cookies, no analytics or tracking tools, no advertising. Personal data is only processed where this is technically necessary to run the site or when you contact me yourself.</p>
-<p class="note">This is an English translation of the German <a href="/de/datenschutz/" lang="de">Datenschutzerklärung</a>. In case of any discrepancy, the German version prevails.</p></div>
-<section class="box"><h2>1. Controller</h2><p class="lines">{esc(lines(L['name'], 'TRVR GDCHLD Visuals', L['street'] + ', ' + L['city'] + ', Germany', 'Email: ' + L['email']))}</p></section>
-<section><h2>2. Hosting and server log files</h2><p>This website is hosted by Cloudflare, Inc., 101 Townsend St., San Francisco, CA 94107, USA, and delivered through its network. When you visit the site, technical data sent by your browser is processed automatically: IP address, date and time of access, the page requested, the previously visited page (referrer), and browser type and operating system.</p>
-<p>This data is needed to deliver the website and protect it against attacks. The legal basis is my legitimate interest in secure and stable operation (Art. 6(1)(f) GDPR). A data processing agreement is in place with Cloudflare. Cloudflare is certified under the EU-U.S. Data Privacy Framework; transfers to the USA are based on the European Commission’s adequacy decision (Art. 45 GDPR). More information: cloudflare.com/privacypolicy.</p></section>
-<section><h2>3. Encryption</h2><p>For security reasons, this site uses SSL/TLS encryption. You can recognise an encrypted connection by “https://” and the padlock symbol in your browser’s address bar.</p></section>
-<section><h2>4. Fonts</h2><p>The fonts used on this website are hosted locally on the server. No connection to Google or any other font provider is made when the page loads.</p></section>
-<section><h2>5. Contact by email</h2><p>If you email me, I process the information it contains (e.g. name, email address, content of your enquiry) to handle your request. The legal basis is Art. 6(1)(b) GDPR where your enquiry relates to a commission, and otherwise my legitimate interest in replying (Art. 6(1)(f) GDPR). Your data is deleted once your enquiry has been dealt with, unless statutory retention obligations apply.</p></section>
-<section id="youtube"><h2>6. Embedded videos (YouTube)</h2><p>For my showreel I embed videos from YouTube. The provider is Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland. I use YouTube’s privacy-enhanced mode (youtube-nocookie.com). Videos are only loaded once you actively click on them. Before that, no data is transferred to YouTube.</p>
-<p>After your click, a connection to YouTube’s servers is established. Among other things, your IP address and information about your device are transmitted, and YouTube may use cookies or similar technologies. Data may be transferred to Google LLC in the USA; Google LLC is certified under the EU-U.S. Data Privacy Framework. The legal basis is your consent (Art. 6(1)(a) GDPR, § 25(1) TDDDG), which you can withdraw at any time with effect for the future. More information: policies.google.com/privacy.</p></section>
-<section><h2>7. Links to social networks</h2><p>This website contains simple links to my profiles on YouTube, Instagram and Pinterest. These are not embedded plugins: as long as you do not click a link, no data is transferred to the respective platform. After clicking, the privacy policy of the respective provider applies:</p>
-<p class="lines">YouTube: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland
-Instagram: Meta Platforms Ireland Limited, Merrion Road, Dublin 4, D04 X2K5, Ireland
-Pinterest: Pinterest Europe Ltd., Palmerston House, 2nd Floor, Fenian Street, Dublin 2, Ireland</p></section>
-<section><h2>8. Your rights</h2><p>You have the right at any time to access your stored data (Art. 15 GDPR), and to rectification (Art. 16), erasure (Art. 17), restriction of processing (Art. 18) and data portability (Art. 20). You can withdraw any consent you have given at any time (Art. 7(3) GDPR). Simply contact me by email.</p>
-<p>You also have the right to lodge a complaint with a data protection supervisory authority (Art. 77 GDPR), in particular in the EU member state or German federal state where you live.</p></section>
-<section class="outline"><h2>9. Right to object</h2><p>Where I process data on the basis of my legitimate interest (Art. 6(1)(f) GDPR), you may object to this processing at any time on grounds relating to your particular situation (Art. 21 GDPR).</p></section>"""
 
 
 def not_found():
@@ -560,9 +541,9 @@ if __name__ == "__main__":
     write("/de/", home("de"))
     write("/guide/", guide("en"))
     write("/de/praxis/", guide("de"))
-    write("/legal-notice/", legal_page("en", "legal", imprint(), "Legal Notice", "Legal notice of TRVR GDCHLD Visuals."))
-    write("/privacy/", legal_page("en", "privacy", privacy(), "Privacy Policy", "Privacy policy of TRVR GDCHLD Visuals."))
-    write("/de/impressum/", legal_page("de", "legal", impressum(), "Impressum", "Impressum von TRVR GDCHLD Visuals."))
-    write("/de/datenschutz/", legal_page("de", "privacy", datenschutz(), "Datenschutz", "Datenschutzerklärung von TRVR GDCHLD Visuals."))
+    write("/legal-notice/", legal_page("en", "legal", "imprint_en", "Legal Notice", "Legal notice of TRVR GDCHLD Visuals."))
+    write("/privacy/", legal_page("en", "privacy", "privacy_en", "Privacy Policy", "Privacy policy of TRVR GDCHLD Visuals."))
+    write("/de/impressum/", legal_page("de", "legal", "impressum_de", "Impressum", "Impressum von TRVR GDCHLD Visuals."))
+    write("/de/datenschutz/", legal_page("de", "privacy", "datenschutz_de", "Datenschutz", "Datenschutzerklärung von TRVR GDCHLD Visuals."))
     (ROOT / "404.html").write_text(not_found(), encoding="utf-8")
     print("   404.html\nFertig.")
