@@ -8,19 +8,13 @@ Portfolio für Fotografie und Motion Graphics. Englisch ist die Standardsprache 
 
 ---
 
-## 1. Online stellen mit Cloudflare Pages (kostenlos)
+## 1. Online (Cloudflare Worker, kostenlos)
 
-1. Bei [dash.cloudflare.com](https://dash.cloudflare.com) anmelden → links **Workers & Pages** → **Create** (bzw. „Anwendung erstellen“).
-2. Den Reiter bzw. Link **Pages** wählen (nicht „Workers“) → **Import an existing Git repository** / „Mit Git verbinden“.
-3. GitHub verbinden und das Repository **trvrgdchld-website** auswählen.
-4. Einstellungen für den Build:
-   - **Production branch:** `main`
-   - **Framework preset:** `None`
-   - **Build command:** leer lassen
-   - **Build output directory:** leer lassen (bzw. `/`)
-5. **Save and Deploy**. Nach ca. einer Minute ist die Seite unter `https://<projektname>.pages.dev` erreichbar.
+Die Seite läuft als Cloudflare Worker mit Git-Anbindung:
+**https://trvrgdchld-website.trevorgoodchild1979.workers.dev**
 
-Jede Änderung im Repository (auch aus dem CMS) wird danach automatisch veröffentlicht.
+Jede Änderung im Repository (auch aus dem CMS) wird automatisch neu veröffentlicht.
+Die Einstellungen dafür stehen in `wrangler.jsonc`; in Cloudflare bleibt der Deploy-Befehl `npx wrangler deploy`.
 
 ## 2. Verwaltungsoberfläche `/admin` freischalten (einmalig)
 
@@ -30,15 +24,15 @@ Der Login läuft über dein GitHub-Konto. Dafür braucht es eine „OAuth App“
    (direkt: https://github.com/settings/applications/new)
 2. Ausfüllen:
    - **Application name:** `TRVR GDCHLD CMS`
-   - **Homepage URL:** `https://<projektname>.pages.dev`
-   - **Authorization callback URL:** `https://<projektname>.pages.dev/api/callback`
+   - **Homepage URL:** `https://trvrgdchld-website.trevorgoodchild1979.workers.dev`
+   - **Authorization callback URL:** `https://trvrgdchld-website.trevorgoodchild1979.workers.dev/api/callback`
 3. **Register application** → auf der nächsten Seite **Generate a new client secret**.
-   Die **Client ID** und das **Client secret** gleich in Cloudflare eintragen (das Secret wird nur einmal angezeigt).
-4. In Cloudflare: dein Pages-Projekt → **Settings → Variables and Secrets** (Umgebungsvariablen, Production) → hinzufügen:
+   Client ID und Client secret gleich in Cloudflare eintragen (das Secret wird nur einmal angezeigt).
+4. In Cloudflare: **Workers & Pages → trvrgdchld-website → Settings → Variables and Secrets → Add**:
    - `GITHUB_CLIENT_ID` = Client ID
-   - `GITHUB_CLIENT_SECRET` = Client secret (als **Secret**/verschlüsselt)
-5. Unter **Deployments** das letzte Deployment erneut ausführen (**Retry deployment**), damit die Variablen greifen.
-6. `https://<projektname>.pages.dev/admin` öffnen → **Mit GitHub anmelden**.
+   - `GITHUB_CLIENT_SECRET` = Client secret (Typ **Secret**)
+   → **Deploy** bzw. Speichern.
+5. `…workers.dev/admin` öffnen → **Mit GitHub anmelden**.
 
 > Wenn später eine eigene Domain dazukommt (z. B. `trvrgdchld.de`), in der OAuth App Homepage- und Callback-URL auf die neue Domain ändern.
 
@@ -61,17 +55,19 @@ Nach dem **Veröffentlichen** im CMS ist die Änderung nach ca. einer Minute liv
 
 Feste Texte, die Praxis-/Guide-Seite sowie **Impressum und Datenschutz** werden aus `tools/build.py` erzeugt.
 Die Angaben fürs Impressum (Name, Anschrift, Telefon, E-Mail, ggf. USt-IdNr.) stehen oben in dieser Datei unter `LEGAL`.
-Nach einer Änderung: `python3 tools/build.py` ausführen und die erzeugten Dateien hochladen.
+Nach einer Änderung: `python3 tools/build.py` ausführen – die Seiten landen in `public/` – und hochladen.
 
 ## Aufbau
 
 ```
-index.html, de/, guide/, …   fertige Seiten (von tools/build.py erzeugt)
-content/*.json               Inhalte, die das CMS bearbeitet
-assets/                      CSS, JavaScript, Schriften, Bilder, Uploads
-admin/                       Decap CMS (Verwaltungsoberfläche)
-functions/api/               Login für das CMS (Cloudflare Pages Functions)
-_headers, robots.txt         Einstellungen für Cloudflare / Suchmaschinen
+public/                      alles, was online sichtbar ist
+  index.html, de/, guide/, … fertige Seiten (von tools/build.py erzeugt)
+  content/*.json             Inhalte, die das CMS bearbeitet
+  assets/                    CSS, JavaScript, Schriften, Bilder, Uploads
+  admin/                     Decap CMS (Verwaltungsoberfläche)
+src/worker.js                Cloudflare Worker: liefert public/ aus + CMS-Login (/api/…)
+wrangler.jsonc               Cloudflare-Einstellungen
+tools/build.py               erzeugt die HTML-Seiten
 ```
 
 Schriften: Syne, DM Sans und JetBrains Mono unter der SIL Open Font License (siehe `assets/fonts/OFL-*.txt`).

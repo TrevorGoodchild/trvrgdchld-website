@@ -1,8 +1,41 @@
-// Cloudflare Pages Function: nimmt die Antwort von GitHub entgegen und gibt
-// den Zugang an das CMS-Fenster weiter. Benötigt GITHUB_CLIENT_ID und
-// GITHUB_CLIENT_SECRET als Umgebungsvariablen in Cloudflare.
-export async function onRequestGet({ request, env }) {
-  const url = new URL(request.url);
+// Cloudflare Worker für TRVR GDCHLD Visuals
+// - Liefert die fertige Website aus dem Ordner public/ aus (static assets)
+// - /api/auth und /api/callback: GitHub-Login für das CMS unter /admin
+//
+// Benötigt in Cloudflare (Worker → Settings → Variables and Secrets):
+//   GITHUB_CLIENT_ID      Client ID der GitHub OAuth App
+//   GITHUB_CLIENT_SECRET  Client secret der GitHub OAuth App (als Secret)
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    if (url.pathname === "/api/auth") return auth(url, env);
+    if (url.pathname === "/api/callback") return callback(request, url, env);
+    return env.ASSETS.fetch(request);
+  },
+};
+
+function auth(url, env) {
+  if (!env.GITHUB_CLIENT_ID) {
+    return new Response("GITHUB_CLIENT_ID fehlt in den Cloudflare-Einstellungen.", { status: 500 });
+  }
+  const state = crypto.randomUUID();
+  const authorize = new URL("https://github.com/login/oauth/authorize");
+  authorize.searchParams.set("client_id", env.GITHUB_CLIENT_ID);
+  authorize.searchParams.set("redirect_uri", `${url.origin}/api/callback`);
+  authorize.searchParams.set("scope", "repo");
+  authorize.searchParams.set("state", state);
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: authorize.toString(),
+      "Set-Cookie": `decap_oauth_state=${state}; Path=/api; HttpOnly; Secure; SameSite=Lax; Max-Age=600`,
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+async function callback(request, url, env) {
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
   const cookie = request.headers.get("Cookie") || "";
@@ -11,7 +44,6 @@ export async function onRequestGet({ request, env }) {
   if (!code || !state || state !== saved) {
     return page("error", { message: "Anmeldung abgebrochen oder abgelaufen. Bitte erneut versuchen." }, url.origin);
   }
-
   try {
     const res = await fetch("https://github.com/login/oauth/access_token", {
       method: "POST",
@@ -33,6 +65,7 @@ export async function onRequestGet({ request, env }) {
   }
 }
 
+// Übergibt das Ergebnis per postMessage an das CMS-Fenster (Decap-Protokoll).
 function page(status, content, origin) {
   const msg = `authorization:github:${status}:${JSON.stringify(content)}`;
   const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Anmeldung</title></head>
@@ -41,7 +74,7 @@ function page(status, content, origin) {
 <script>
 (function () {
   var origin = ${JSON.stringify(origin)};
-  var msg = ${JSON.stringify(msg)};
+  var msg = ${JSON.stringify(msg).replace(/</g, "\\u003c")};
   function receive(e) {
     if (e.origin !== origin) return;
     window.opener.postMessage(msg, origin);

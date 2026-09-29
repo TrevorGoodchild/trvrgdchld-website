@@ -12,7 +12,7 @@
 </head>
 <body>
 <script>
-  // Login läuft über die eigene Website (Cloudflare Functions unter /api/auth),
+  // Login läuft über die eigene Website (Cloudflare Worker unter /api/auth, siehe src/worker.js),
   // deshalb wird die Adresse hier automatisch eingesetzt.
   CMS.init({
     config: {

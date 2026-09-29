@@ -10,7 +10,7 @@ Aufruf:  python3 tools/build.py
 from html import escape as esc
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent / "public"
 SITE = "TRVR GDCHLD Visuals"
 
 # ---------------------------------------------------------------- Rechtliche Angaben

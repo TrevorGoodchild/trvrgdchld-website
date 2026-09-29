@@ -1,0 +1,18 @@
+{
+  // Cloudflare-Einstellungen für die Website (wird von "npx wrangler deploy" gelesen)
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "trvrgdchld-website",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  // Im Dashboard gesetzte Variablen bei jedem Deploy behalten
+  "keep_vars": true,
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true }
+}
