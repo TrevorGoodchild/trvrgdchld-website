@@ -1,0 +1,10 @@
+{
+  "series": "A",
+  "cards": [
+    { "value": "1/15", "aperture": "f/5.6", "iso": "ISO 200", "highlight": false },
+    { "value": "1/60", "aperture": "f/5.6", "iso": "ISO 200", "highlight": false },
+    { "value": "1/250", "aperture": "f/5.6", "iso": "ISO 400", "highlight": true },
+    { "value": "1/1000", "aperture": "f/5.6", "iso": "ISO 1600", "highlight": false },
+    { "value": "1/4000", "aperture": "f/5.6", "iso": "ISO 6400", "highlight": false }
+  ]
+}

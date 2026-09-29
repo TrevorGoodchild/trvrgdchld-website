@@ -1,0 +1,116 @@
+# Decap CMS – Einstellungen der Verwaltungsoberfläche unter /admin
+# Die Verbindung zu GitHub (backend) steht in admin/index.html.
+
+locale: de
+media_folder: assets/uploads
+public_folder: /assets/uploads
+site_url: /
+display_url: /
+logo_url: /assets/img/logo.png
+
+collections:
+  - name: fotos
+    label: Fotos
+    editor: { preview: false }
+    files:
+      - name: photos
+        label: Fotogalerie
+        file: content/photos.json
+        fields:
+          - name: photos
+            label: Fotos
+            label_singular: Foto
+            widget: list
+            summary: "{{fields.title}} · {{fields.category}}"
+            hint: Reihenfolge per Ziehen ändern. Das erste Foto steht oben links.
+            fields:
+              - { name: title, label: Titel, widget: string }
+              - { name: image, label: Bild, widget: image, required: false, hint: "JPG oder WebP, lange Kante ca. 2000 px, möglichst unter 500 KB." }
+              - { name: alt, label: Bildbeschreibung (für Screenreader), widget: string, required: false }
+              - name: category
+                label: Kategorie
+                widget: select
+                options:
+                  - { label: Portrait, value: portrait }
+                  - { label: Street, value: street }
+                  - { label: Landschaft, value: landscape }
+                  - { label: Produkt, value: product }
+              - name: size
+                label: Kachelgröße
+                widget: select
+                default: normal
+                options:
+                  - { label: Normal, value: normal }
+                  - { label: Groß (2 × 2), value: large }
+                  - { label: Breit (2 × 1), value: wide }
+                  - { label: Hoch (1 × 2), value: tall }
+              - { name: focal, label: Brennweite, widget: string, required: false, hint: "z. B. 25 mm" }
+              - { name: aperture, label: Blende, widget: string, required: false, hint: "z. B. f/5.6" }
+              - { name: shutter, label: Verschlusszeit, widget: string, required: false, hint: "z. B. 1/250 s" }
+              - { name: iso, label: ISO, widget: string, required: false, hint: "z. B. ISO 200" }
+
+  - name: motion
+    label: Motion-Projekte
+    editor: { preview: false }
+    files:
+      - name: motion
+        label: Projekte
+        file: content/motion.json
+        fields:
+          - name: projects
+            label: Projekte
+            label_singular: Projekt
+            widget: list
+            summary: "{{fields.title_de}}"
+            fields:
+              - { name: title_en, label: Titel (Englisch), widget: string }
+              - { name: title_de, label: Titel (Deutsch), widget: string }
+              - { name: tag, label: Kategorie-Zeile, widget: string, hint: "z. B. UI · Animation" }
+              - { name: text_en, label: Kurzbeschreibung (Englisch), widget: text, required: false }
+              - { name: text_de, label: Kurzbeschreibung (Deutsch), widget: text, required: false }
+              - { name: image, label: Vorschaubild, widget: image, required: false }
+              - { name: youtube_url, label: YouTube-Link, widget: string, required: false, hint: "Vollständiger Link, z. B. https://www.youtube.com/watch?v=… – öffnet sich in neuem Tab." }
+
+  - name: labor
+    label: Labor
+    editor: { preview: false }
+    files:
+      - name: lab
+        label: Vorhaltekarten
+        file: content/lab.json
+        fields:
+          - { name: series, label: Serien-Bezeichnung, widget: string, hint: "z. B. A" }
+          - name: cards
+            label: Karten
+            label_singular: Karte
+            widget: list
+            summary: "{{fields.value}} · {{fields.aperture}} · {{fields.iso}}"
+            fields:
+              - { name: value, label: Großer Wert, widget: string, hint: "z. B. 1/250" }
+              - { name: aperture, label: Blende, widget: string, required: false }
+              - { name: iso, label: ISO, widget: string, required: false }
+              - { name: highlight, label: Hervorheben (Pfirsich), widget: boolean, default: false, required: false }
+
+  - name: einstellungen
+    label: Einstellungen
+    editor: { preview: false }
+    files:
+      - name: settings
+        label: Allgemein & Kontakt
+        file: content/settings.json
+        fields:
+          - { name: name, label: Dein Name, widget: string }
+          - { name: email, label: E-Mail-Adresse, widget: string, required: false }
+          - { name: city_en, label: Ort (Englisch), widget: string, required: false }
+          - { name: city_de, label: Ort (Deutsch), widget: string, required: false }
+          - { name: established, label: Seit (Jahr), widget: string, required: false }
+          - { name: available_en, label: Verfügbar ab (Englisch), widget: string, required: false, hint: "z. B. From November" }
+          - { name: available_de, label: Verfügbar ab (Deutsch), widget: string, required: false, hint: "z. B. Ab November" }
+          - { name: portrait, label: Portraitfoto, widget: image, required: false }
+          - { name: about_en, label: Über mich (Englisch), widget: text, required: false }
+          - { name: about_de, label: Über mich (Deutsch), widget: text, required: false }
+          - { name: showreel_youtube_id, label: Showreel (YouTube-Link oder Video-ID), widget: string, required: false }
+          - { name: showreel_label, label: Showreel-Bezeichnung, widget: hidden, required: false }
+          - { name: youtube_url, label: YouTube-Kanal (Link), widget: string, required: false, hint: "https://www.youtube.com/@…" }
+          - { name: instagram_url, label: Instagram (Link), widget: string, required: false, hint: "https://www.instagram.com/…" }
+          - { name: pinterest_url, label: Pinterest (Link), widget: string, required: false, hint: "https://www.pinterest.com/…" }
