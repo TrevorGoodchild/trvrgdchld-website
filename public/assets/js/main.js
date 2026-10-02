@@ -15,7 +15,8 @@
       watch: "Watch on YouTube",
       noReel: "The showreel will be available here soon.",
       series: "SERIES", shutter: "SHUTTER · MECH.",
-      menuOpen: "Open menu", menuClose: "Close menu"
+      menuOpen: "Open menu", menuClose: "Close menu",
+      themeLight: "Switch to light theme", themeDark: "Switch to dark theme"
     },
     de: {
       cats: { all: "Alle", portrait: "Portrait", street: "Street", landscape: "Landschaft", product: "Produkt", event: "Event & Konzert" },
@@ -26,7 +27,8 @@
       watch: "Auf YouTube ansehen",
       noReel: "Das Showreel ist hier bald zu sehen.",
       series: "SERIE", shutter: "VERSCHLUSS · MECH.",
-      menuOpen: "Menü öffnen", menuClose: "Menü schließen"
+      menuOpen: "Menü öffnen", menuClose: "Menü schließen",
+      themeLight: "Helles Design aktivieren", themeDark: "Dunkles Design aktivieren"
     }
   }[lang];
   var TILE_COLORS = ["#3A2640", "#5A3440", "#6E3F32", "#4A2F45", "#33213A"];
@@ -57,6 +59,26 @@
     return /^[A-Za-z0-9_-]{11}$/.test(v) ? v : "";
   }
   function safeUrl(u) { return /^https:\/\//i.test(u || "") ? u : ""; }
+
+  /* Theme toggle (dark/light), stored only in this browser */
+  var themeBtn = document.querySelector(".theme-btn");
+  var themeMeta = document.querySelector('meta[name="theme-color"]');
+  function applyTheme(mode, save) {
+    var light = mode === "light";
+    document.documentElement.dataset.theme = light ? "light" : "dark";
+    if (themeMeta) themeMeta.content = light ? "#F6E7D8" : "#1C1220";
+    if (themeBtn) {
+      var label = light ? L.themeDark : L.themeLight;
+      themeBtn.setAttribute("aria-pressed", light ? "true" : "false");
+      themeBtn.setAttribute("aria-label", label);
+      themeBtn.title = label;
+    }
+    if (save) { try { localStorage.setItem("theme", light ? "light" : "dark"); } catch (e) {} }
+  }
+  applyTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark", false);
+  if (themeBtn) themeBtn.addEventListener("click", function () {
+    applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light", true);
+  });
 
   /* Mobile menu */
   var menuBtn = document.querySelector(".menu-btn");

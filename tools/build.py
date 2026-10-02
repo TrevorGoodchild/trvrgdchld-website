@@ -42,7 +42,7 @@ ICON = {
 T = {
     "en": {
         "skip": "Skip to content", "nav_label": "Main navigation", "lang_label": "Choose language",
-        "menu": "Open menu",
+        "menu": "Open menu", "theme_light": "Switch to light theme",
         "nav": [("#work", "Photography"), ("#motion", "Motion"), ("#lab", "Lab"), ("#about", "About")],
         "guide": "Guide", "cta": "Start a project",
         "legal": "Legal notice", "privacy": "Privacy", "other_lang": "Deutsch", "home": "Back to home",
@@ -69,7 +69,7 @@ T = {
     },
     "de": {
         "skip": "Zum Inhalt springen", "nav_label": "Hauptnavigation", "lang_label": "Sprache wählen",
-        "menu": "Menü öffnen",
+        "menu": "Menü öffnen", "theme_light": "Helles Design aktivieren",
         "nav": [("#arbeiten", "Fotografie"), ("#motion", "Motion"), ("#labor", "Labor"), ("#ueber", "Über")],
         "guide": "Praxis", "cta": "Projekt anfragen",
         "legal": "Impressum", "privacy": "Datenschutz", "other_lang": "English", "home": "Zur Startseite",
@@ -108,6 +108,7 @@ def head(lang, title, desc, page, alt_page):
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <meta name="theme-color" content="#1C1220">
+<script>try{{var m=localStorage.getItem("theme");if(m==="light"||m==="dark"){{document.documentElement.dataset.theme=m;}}if(m==="light")document.querySelector('meta[name="theme-color"]').content="#F6E7D8";}}catch(e){{}}</script>
 <link rel="alternate" hreflang="{lang}" href="{URL[lang].get(page, '/')}">
 <link rel="alternate" hreflang="{other}" href="{URL[other].get(alt_page, '/')}">
 <link rel="alternate" hreflang="x-default" href="{URL['en'].get(alt_page if lang == 'de' else page, '/')}">
@@ -139,14 +140,17 @@ def header(lang, page, alt_page):
     return f"""<a class="skip" href="#main">{t['skip']}</a>
 <header class="site-header">
 <div class="wrap">
-<a class="brand" href="{home}"><span class="brand-plate"><img src="/assets/img/logo-mark.png" alt="" width="170" height="120"></span><span class="brand-name"><b>TRVR GDCHLD</b><span>VISUALS</span></span></a>
-<button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="{t['menu']}">{ICON['menu']}</button>
+<a class="brand" href="{home}"><span class="brand-plate"><img class="logo-dark" src="/assets/img/logo-mark-dark.png" alt="" width="120" height="96"><img class="logo-light" src="/assets/img/logo-mark-light.png" alt="" width="120" height="96"></span><span class="brand-name"><b>TRVR GDCHLD</b><span>VISUALS</span></span></a>
 <nav class="nav" id="nav" aria-label="{t['nav_label']}">
 {links}
 <a href="{u['guide']}"{guide_cur}>{t['guide']}</a>
 <a class="btn btn-primary" href="{pfx}{contact}">{t['cta']}</a>
 <div class="lang" role="group" aria-label="{t['lang_label']}"><a href="{en_href}" lang="en"{en_cur}>EN</a><a href="{de_href}" lang="de"{de_cur}>DE</a></div>
 </nav>
+<div class="header-tools">
+<button class="theme-btn" type="button" aria-pressed="false" aria-label="{t['theme_light']}" title="{t['theme_light']}"><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="{t['menu']}">{ICON['menu']}</button>
+</div>
 </div>
 </header>
 """
@@ -201,7 +205,7 @@ def home(lang):
 </div>
 </div>
 <div class="hero-mark">
-<div class="logo-plate"><img src="/assets/img/logo-full.png" alt="{t['logo_alt']}" width="720" height="727"></div>
+<div class="logo-plate"><img class="logo-dark" src="/assets/img/logo-full-dark.png" alt="{t['logo_alt']}" width="800" height="757"><img class="logo-light" src="/assets/img/logo-full-light.png" alt="{t['logo_alt']}" width="800" height="757"></div>
 <span data-hide-empty="established">{t['est']} <span data-set="established"></span></span>
 </div>
 </div>
@@ -441,7 +445,7 @@ def guide(lang):
     head_cols = "".join(f'<th scope="col">{c}</th>' for c in g["cols"])
     rows = "".join("<tr><th scope=\"row\">" + esc(r[0]) + "</th>" + "".join(f"<td>{esc(c)}</td>" for c in r[1:]) + "</tr>" for r in g["rows"])
     circles = [(60, 40, "f/3.5"), (190, 25, "f/5.6"), (310, 17.5, "f/8"), (425, 12.7, "f/11"), (545, 6.4, "f/22")]
-    svg = "".join(f'<circle cx="{x}" cy="50" r="{r}" fill="none" stroke="#F4B98E" stroke-width="2"/><text x="{x}" y="118" text-anchor="middle" fill="#BFA9B4" font-family="JetBrains Mono, monospace" font-size="13">{l}</text>' for x, r, l in circles)
+    svg = "".join(f'<circle cx="{x}" cy="50" r="{r}" fill="none" stroke-width="2"/><text x="{x}" y="118" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13">{l}</text>' for x, r, l in circles)
     cheat_id = "cheatsheet" if lang == "en" else "spickzettel"
     return head(lang, f"{g['title']} – {SITE}", g["desc"], "guide", "guide") + header(lang, "guide", "guide") + f"""<main id="main">
 

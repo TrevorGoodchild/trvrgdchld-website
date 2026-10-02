@@ -54,7 +54,7 @@
   },
   "datenschutz_de": {
     "updated": "September 2026",
-    "intro": "Diese Website ist bewusst schlank gebaut: keine Cookies, keine Analyse- oder Tracking-Tools, keine Werbung. Personenbezogene Daten werden nur verarbeitet, soweit das für den Betrieb der Seite technisch nötig ist oder Sie mich von sich aus kontaktieren.",
+    "intro": "Diese Website ist bewusst schlank gebaut: keine Cookies, keine Analyse- oder Tracking-Tools, keine Werbung. Wählen Sie das helle oder dunkle Design, wird nur diese Einstellung lokal in Ihrem Browser gespeichert (localStorage) und nicht an mich übertragen; Sie können sie jederzeit über die Browser-Einstellungen löschen. Personenbezogene Daten werden nur verarbeitet, soweit das für den Betrieb der Seite technisch nötig ist oder Sie mich von sich aus kontaktieren.",
     "sections": [
       {
         "title": "Hosting und Server-Logfiles",
@@ -108,7 +108,7 @@
   },
   "privacy_en": {
     "updated": "September 2026",
-    "intro": "This website is deliberately lean: no cookies, no analytics or tracking tools, no advertising. Personal data is only processed where this is technically necessary to run the site or when you contact me yourself.",
+    "intro": "This website is deliberately lean: no cookies, no analytics or tracking tools, no advertising. If you choose the light or dark theme, only that setting is stored locally in your browser (localStorage) and never sent to me; you can delete it at any time in your browser settings. Personal data is only processed where this is technically necessary to run the site or when you contact me yourself.",
     "sections": [
       {
         "title": "Hosting and server log files",
