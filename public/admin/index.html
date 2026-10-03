@@ -7,24 +7,12 @@
 <title>Inhalte verwalten – TRVR GDCHLD Visuals</title>
 <link rel="icon" type="image/png" href="/assets/img/favicon-32.png">
 <link href="/admin/config.yml" type="text/yaml" rel="cms-config-url">
-<script>window.CMS_MANUAL_INIT = true;</script>
-<script src="https://unpkg.com/decap-cms@^3.3.0/dist/decap-cms.js"></script>
 </head>
 <body>
-<script>
-  // Login läuft über die eigene Website (Cloudflare Worker unter /api/auth, siehe src/worker.js),
-  // deshalb wird die Adresse hier automatisch eingesetzt.
-  CMS.init({
-    config: {
-      backend: {
-        name: "github",
-        repo: "TrevorGoodchild/trvrgdchld-website",
-        branch: "main",
-        base_url: window.location.origin,
-        auth_endpoint: "api/auth"
-      }
-    }
-  });
-</script>
+<!-- Sveltia CMS: liest dieselbe config.yml wie zuvor Decap CMS, kann aber mehrere Fotos
+     auf einmal hochladen und verkleinert Bilder beim Hochladen.
+     Login wie bisher über GitHub (Cloudflare Worker unter /api/auth).
+     Falls diese Seite einmal nicht lädt: Reserve unter /admin/decap/ -->
+<script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
 </body>
 </html>

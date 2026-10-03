@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Inhalte verwalten (Reserve) – TRVR GDCHLD Visuals</title>
+<link rel="icon" type="image/png" href="/assets/img/favicon-32.png">
+<link href="/admin/config.yml" type="text/yaml" rel="cms-config-url">
+<script>window.CMS_MANUAL_INIT = true;</script>
+<script src="https://unpkg.com/decap-cms@^3.3.0/dist/decap-cms.js"></script>
+</head>
+<body>
+<script>
+  // Reserve-Oberfläche (Decap CMS), falls die normale Verwaltung unter /admin einmal nicht lädt.
+  // Mehrfachauswahl von Fotos gibt es hier nicht.
+  CMS.init({
+    config: {
+      backend: {
+        name: "github",
+        repo: "TrevorGoodchild/trvrgdchld-website",
+        branch: "main",
+        base_url: window.location.origin,
+        auth_endpoint: "api/auth"
+      }
+    }
+  });
+</script>
+</body>
+</html>

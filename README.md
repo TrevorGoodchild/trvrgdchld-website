@@ -42,17 +42,21 @@ Unter `/admin` gibt es diese Bereiche:
 
 | Bereich | Was du dort änderst |
 |---|---|
-| **Foto-Alben** | Alben anlegen (Titel DE/EN, Kurzname für die Adresse, Kategorie, Datum, Ort, Titelbild, Beschreibung, Kamera) und darin Fotos mit Bildunterschrift und Aufnahmedaten |
+| **Foto-Alben** | Alben anlegen (Titel DE/EN, Kurzname, Kategorie, Datum, Ort, Titelbild, Beschreibung). Kamera und Aufnahmedaten beim Album gelten für alle Fotos. Unter **Fotos (mehrere auf einmal)** mehrere Bilder gleichzeitig hochladen. Unter **Foto-Details** nur dann ein Foto erneut wählen, wenn es eine Bildunterschrift oder abweichende Werte bekommt. |
 | **Motion-Playlists** | YouTube-Playlists mit Titel, Text und eigenem Vorschaubild |
 | **Labor** | Testreihen (z. B. Verschlusszeit, Blende): je Bild Foto, Verschlusszeit, Blende, ISO, Weißabgleich, Brennweite. Ein Bild als „Referenz“ markieren – es steht im Vergleich links. Histogramm und Helligkeitsskala rechnet die Seite selbst aus. |
 | **Rechtliches** | Deine Angaben fürs Impressum, weitere Impressum-Abschnitte, Datenschutzerklärung (DE/EN) |
-| **Einstellungen** | Name, E-Mail, Ort, „Verfügbar ab“, Portraitfoto, Über-mich-Text (EN/DE), Showreel, Social-Media-Links |
+| **Einstellungen** | Name, E-Mail, Ort, „Verfügbar ab“, Portraitfoto, Über-mich-Text (EN/DE), Showreel, Social-Media-Links (YouTube, Instagram, Pinterest, Flickr – kompletter Link mit https://), Intro-Animation |
 
 Jedes Album hat eine eigene Seite: `/album/?a=<kurzname>` (Deutsch: `/de/album/?a=<kurzname>`). Ein bestimmtes Foto verlinkst du mit `#<nummer>` am Ende, z. B. `…?a=<kurzname>#3`.
 
 Nach dem **Veröffentlichen** im CMS ist die Änderung nach ca. einer Minute live.
 
 **Bilder:** am besten JPG oder WebP mit ca. 2000 px an der langen Kante und unter 500 KB – so lädt die Seite schnell.
+
+**Verwaltung:** `/admin` nutzt Sveltia CMS (gleiche Einstellungen wie Decap, kann mehrere Fotos auf einmal hochladen und verkleinert Fotos beim Hochladen auf max. 2400 px als WebP). Falls `/admin` einmal nicht lädt, gibt es die bisherige Oberfläche als Reserve unter `/admin/decap/`.
+
+**Intro:** Die Intro-Seite liegt unter `/intro/` (Deutsch `/de/intro/`). Video im CMS unter Einstellungen hochladen (MP4, möglichst unter 20 MB; Cloudflare erlaubt höchstens 25 MB pro Datei). Mit „Intro vor der Startseite zeigen“ sehen neue Besucher zuerst das Intro; ohne Video läuft eine Logo-Animation.
 
 ## 4. Was nicht im CMS steht
 

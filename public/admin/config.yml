@@ -1,7 +1,15 @@
-# Decap CMS – Einstellungen der Verwaltungsoberfläche unter /admin
-# Die Verbindung zu GitHub (backend) steht in public/admin/index.html.
+# CMS-Einstellungen der Verwaltungsoberfläche unter /admin (Sveltia CMS)
+# und der Reserve unter /admin/decap/ (Decap CMS) – beide lesen diese Datei.
+# Login über GitHub, abgewickelt vom Cloudflare Worker (src/worker.js, /api/auth).
+# Bei eigener Domain: base_url unten auf die neue Adresse ändern.
 # Dateipfade beziehen sich auf das Repository, daher "public/…".
 
+backend:
+  name: github
+  repo: TrevorGoodchild/trvrgdchld-website
+  branch: main
+  base_url: https://trvrgdchld-website.trevorgoodchild1979.workers.dev
+  auth_endpoint: api/auth
 locale: de
 media_folder: public/assets/uploads
 public_folder: /assets/uploads
@@ -78,21 +86,52 @@ collections:
         widget: text
         required: false
       - name: camera
-        label: Kamera (für alle Fotos)
+        label: Kamera
         widget: string
         required: false
         default: LUMIX G70
-        hint: z. B. LUMIX G70 oder Samsung Galaxy A52s. Kann pro Foto überschrieben werden.
+        hint: Gilt für alle Fotos dieses Albums.
+      - name: focal
+        label: Brennweite
+        widget: string
+        required: false
+        hint: Standard für alle Fotos, z. B. 25 mm
+      - name: aperture
+        label: Blende
+        widget: string
+        required: false
+        hint: Standard für alle Fotos, z. B. f/5.6
+      - name: shutter
+        label: Verschlusszeit
+        widget: string
+        required: false
+        hint: Standard für alle Fotos, z. B. 1/250
+      - name: iso
+        label: ISO
+        widget: string
+        required: false
+        hint: Standard für alle Fotos, z. B. ISO 200
+      - name: wb
+        label: Weißabgleich
+        widget: string
+        required: false
+        hint: Standard für alle Fotos, z. B. AWB
+      - name: images
+        label: Fotos (mehrere auf einmal)
+        widget: image
+        multiple: true
+        required: false
+        hint: Mehrere Fotos gleichzeitig auswählen oder hineinziehen. Reihenfolge per Ziehen ändern. Große Fotos werden beim Hochladen automatisch verkleinert.
       - name: photos
-        label: Fotos
-        label_singular: Foto
+        label: Foto-Details (optional)
+        label_singular: Foto-Detail
         widget: list
         summary: '{{fields.caption}} {{fields.image}}'
         fields:
         - name: image
           label: Bild
           widget: image
-          hint: JPG, lange Kante ca. 2000 px, möglichst unter 500 KB. Handyfotos vorher verkleinern (z. B. mit squoosh.app).
+          hint: Ein Foto aus dem Album auswählen.
         - name: caption
           label: Bildunterschrift
           widget: string
@@ -106,30 +145,31 @@ collections:
           widget: string
           required: false
         - name: focal
-          label: Brennweite
+          label: Brennweite (nur falls abweichend)
           widget: string
           required: false
           hint: z. B. 25 mm
         - name: aperture
-          label: Blende
+          label: Blende (nur falls abweichend)
           widget: string
           required: false
           hint: z. B. f/5.6
         - name: shutter
-          label: Verschlusszeit
+          label: Verschlusszeit (nur falls abweichend)
           widget: string
           required: false
           hint: z. B. 1/250 s
         - name: iso
-          label: ISO
+          label: ISO (nur falls abweichend)
           widget: string
           required: false
           hint: z. B. ISO 200
         - name: wb
-          label: Weißabgleich
+          label: Weißabgleich (nur falls abweichend)
           widget: string
           required: false
           hint: optional, z. B. AWB oder 5500 K
+        hint: Nur nötig, wenn ein Foto eine Bildunterschrift bekommen soll oder andere Werte hat als oben beim Album. Wähle dazu das Foto erneut aus.
 - name: playlists
   label: Motion-Playlists
   editor:
@@ -526,17 +566,47 @@ collections:
       widget: hidden
       required: false
     - name: youtube_url
-      label: YouTube-Kanal (Link)
+      label: Social Media – YouTube-Kanal
       widget: string
       required: false
-      hint: https://www.youtube.com/@…
+      hint: Kompletter Link, z. B. https://www.youtube.com/@deinname
     - name: instagram_url
-      label: Instagram (Link)
+      label: Social Media – Instagram
       widget: string
       required: false
-      hint: https://www.instagram.com/…
+      hint: z. B. https://www.instagram.com/deinname
     - name: pinterest_url
-      label: Pinterest (Link)
+      label: Social Media – Pinterest
       widget: string
       required: false
-      hint: https://www.pinterest.com/…
+      hint: z. B. https://www.pinterest.de/deinname
+    - name: flickr_url
+      label: Social Media – Flickr
+      widget: string
+      required: false
+      hint: z. B. https://www.flickr.com/photos/deinname
+    - name: intro_enabled
+      label: Intro vor der Startseite zeigen
+      widget: boolean
+      default: false
+      required: false
+      hint: Neue Besucher sehen zuerst die Intro-Seite. Ausgeschaltet bleibt die Intro-Seite unter /intro/ erreichbar.
+    - name: intro_video
+      label: Intro-Animation (Video)
+      widget: file
+      required: false
+      hint: MP4 (H.264), am besten unter 20 MB. Ohne Video zeigt die Intro-Seite eine Logo-Animation.
+    - name: intro_poster
+      label: Intro – Standbild (optional)
+      widget: image
+      required: false
+      hint: Wird gezeigt, bis das Video lädt.
+media_libraries:
+  default:
+    config:
+      transformations:
+        raster_image:
+          format: webp
+          quality: 85
+          width: 2400
+          height: 2400

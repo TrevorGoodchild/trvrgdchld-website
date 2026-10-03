@@ -20,7 +20,7 @@
       cmpText: function (p) { return p + " % A visible"; },
       pickFor: "Card sets", left: "left", right: "right", histo: "HISTOGRAM", brightness: "Image brightness",
       evLabel: "Brightness B vs. A", evNone: "no comparison", ref: "Reference", cardLabel: function (v, side) { return v + (side ? " – shown " + side : ""); },
-      menuOpen: "Open menu", menuClose: "Close menu",
+      menuOpen: "Open menu", menuClose: "Close menu", soundOn: "Sound on", soundOff: "Sound off",
       themeLight: "Switch to light theme", themeDark: "Switch to dark theme"
     },
     de: {
@@ -37,7 +37,7 @@
       cmpText: function (p) { return p + " % A sichtbar"; },
       pickFor: "Karte setzt", left: "links", right: "rechts", histo: "HISTOGRAMM", brightness: "Bildhelligkeit",
       evLabel: "Helligkeit B zu A", evNone: "kein Vergleich", ref: "Referenz", cardLabel: function (v, side) { return v + (side ? " – angezeigt " + side : ""); },
-      menuOpen: "Menü öffnen", menuClose: "Menü schließen",
+      menuOpen: "Menü öffnen", menuClose: "Menü schließen", soundOn: "Ton an", soundOff: "Ton aus",
       themeLight: "Helles Design aktivieren", themeDark: "Dunkles Design aktivieren"
     }
   }[lang];
@@ -104,6 +104,49 @@
     });
   }
 
+  /* Settings are needed on every page (social links in the footer) */
+  var settingsP = getJSON("/content/settings.json");
+  settingsP.then(function (s) {
+    document.querySelectorAll("[data-social]").forEach(function (a) {
+      var url = safeUrl(s[a.getAttribute("data-social") + "_url"]);
+      if (url) { a.href = url; a.hidden = false; } else a.hidden = true;
+    });
+  }).catch(function () {});
+
+  /* Intro page: plays the intro animation (video from the CMS), then continues to the home page */
+  var introEl = document.querySelector("[data-intro]");
+  if (introEl) {
+    var next = introEl.getAttribute("data-next") || "/", finished = false;
+    var finish = function () {
+      if (finished) return; finished = true;
+      introEl.classList.add("out");
+      setTimeout(function () { location.replace(next); }, 550);
+    };
+    var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var fallback = function () { introEl.classList.add("play"); setTimeout(finish, reduce ? 1500 : 3400); };
+    document.getElementById("intro-skip").addEventListener("click", function (e) { e.preventDefault(); finish(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" || e.key === "Enter") { e.preventDefault(); finish(); } });
+    settingsP.then(function (s) {
+      var src = s.intro_video, video = document.getElementById("intro-video");
+      if (!src || !/^\/|^https:\/\//.test(src)) return fallback();
+      if (s.intro_poster) video.poster = s.intro_poster;
+      video.src = src; video.hidden = false;
+      document.getElementById("intro-fallback").hidden = true;
+      video.addEventListener("ended", finish);
+      video.addEventListener("error", function () { video.hidden = true; document.getElementById("intro-fallback").hidden = false; fallback(); });
+      var snd = document.getElementById("intro-sound");
+      snd.hidden = false;
+      snd.addEventListener("click", function () {
+        video.muted = !video.muted;
+        snd.setAttribute("aria-pressed", video.muted ? "false" : "true");
+        snd.textContent = video.muted ? L.soundOn : L.soundOff;
+      });
+      var pr = video.play();
+      if (pr && pr.catch) pr.catch(function () { video.controls = true; });
+    }).catch(fallback);
+    return;
+  }
+
   /* Legal pages: refresh from /content/legal.json (edited in the CMS).
      Must match legal_sections() in tools/build.py. */
   var legalBox = document.querySelector("[data-legal]");
@@ -150,6 +193,23 @@
   }
   function specsOf(ph, fallbackCam) {
     return [ph.camera || fallbackCam, ph.focal, ph.aperture, ph.shutter, ph.iso].filter(Boolean).join(" · ");
+  }
+
+  /* Photos of an album: images picked in bulk (images) plus optional per-photo details (photos).
+     Album values (camera, focal length, …) apply to every photo unless a photo sets its own. */
+  function albumPhotos(al) {
+    var details = {}, seen = {}, out = [];
+    (al.photos || []).forEach(function (p) { if (p && p.image) details[p.image] = p; });
+    var list = (Array.isArray(al.images) ? al.images : (al.images ? [al.images] : []))
+      .concat((al.photos || []).map(function (p) { return p && p.image; }));
+    list.forEach(function (src) {
+      if (!src || seen[src]) return;
+      seen[src] = true;
+      var d = details[src] || {}, ph = { image: src, caption: d.caption || "", alt: d.alt || "" };
+      ["camera", "focal", "aperture", "shutter", "iso", "wb"].forEach(function (k) { ph[k] = d[k] || al[k] || ""; });
+      out.push(ph);
+    });
+    return out;
   }
 
   /* Shared camera-display helpers (album viewer + full screen) */
@@ -228,7 +288,7 @@
       var title = pick(al, "title");
       titleEl.textContent = title;
       document.title = title + " – TRVR GDCHLD Visuals";
-      var photos = al.photos || [];
+      var photos = albumPhotos(al);
       var meta = [L.cats[al.category] || al.category, dateLabel(al.date), al.place, photos.length + " " + (photos.length === 1 ? L.photo : L.photos)].filter(Boolean).join(" · ");
       document.getElementById("album-meta").textContent = meta;
       var txt = document.getElementById("album-text"), t = pick(al, "text");
@@ -327,7 +387,12 @@
   if (!document.getElementById("album-grid")) return;
 
   /* Settings */
-  getJSON("/content/settings.json").then(function (s) {
+  settingsP.then(function (s) {
+    var root = document.documentElement;
+    if (root.classList.contains("intro-gate")) {
+      if (s.intro_enabled) { location.replace(lang === "de" ? "/de/intro/" : "/intro/"); return; }
+      root.classList.remove("intro-gate");
+    }
     document.querySelectorAll("[data-set]").forEach(function (n) {
       var v = pick(s, n.getAttribute("data-set"));
       if (v) n.textContent = v;
@@ -337,14 +402,10 @@
     });
     var mail = document.getElementById("mail");
     if (mail && s.email) { mail.href = "mailto:" + s.email; mail.textContent = s.email; }
-    ["youtube", "instagram", "pinterest"].forEach(function (k) {
-      var a = document.getElementById("s-" + k), url = safeUrl(s[k + "_url"]);
-      if (a) { if (url) { a.href = url; a.hidden = false; } else a.hidden = true; }
-    });
     var p = document.getElementById("portrait");
     if (p && s.portrait) { p.textContent = ""; p.appendChild(el("img", { src: s.portrait, alt: s.name || "", loading: "lazy" })); }
     setupReel(youtubeId(s.showreel_youtube_id));
-  }).catch(function () { setupReel(""); });
+  }).catch(function () { document.documentElement.classList.remove("intro-gate"); setupReel(""); });
 
   /* Showreel: loads YouTube only after a click (privacy) */
   function setupReel(id) {
@@ -376,7 +437,7 @@
     var cats = ["all"];
     albums.forEach(function (al, i) {
       if (al.category && cats.indexOf(al.category) < 0) cats.push(al.category);
-      var photos = al.photos || [];
+      var photos = albumPhotos(al);
       var cover = al.cover || (photos[0] && photos[0].image) || "";
       var thumb = el("div", { class: "album-cover" });
       if (cover) thumb.appendChild(el("img", { src: cover, alt: "", loading: "lazy", decoding: "async" }));

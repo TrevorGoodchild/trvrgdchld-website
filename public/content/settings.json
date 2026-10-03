@@ -13,5 +13,9 @@
   "email": "trevorgoodchild1979@gmail.com",
   "city_en": "Kupferzell",
   "available_en": "[From month]",
-  "showreel_youtube_id": ""
+  "showreel_youtube_id": "",
+  "flickr_url": "",
+  "intro_enabled": false,
+  "intro_video": "",
+  "intro_poster": ""
 }

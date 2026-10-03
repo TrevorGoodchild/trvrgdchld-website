@@ -22,8 +22,8 @@ LEGAL_FILE = ROOT / "content" / "legal.json"
 
 # ---------------------------------------------------------------- Routen
 URL = {
-    "en": {"home": "/", "guide": "/guide/", "legal": "/legal-notice/", "privacy": "/privacy/", "album": "/album/"},
-    "de": {"home": "/de/", "guide": "/de/praxis/", "legal": "/de/impressum/", "privacy": "/de/datenschutz/", "album": "/de/album/"},
+    "en": {"home": "/", "guide": "/guide/", "legal": "/legal-notice/", "privacy": "/privacy/", "album": "/album/", "intro": "/intro/"},
+    "de": {"home": "/de/", "guide": "/de/praxis/", "legal": "/de/impressum/", "privacy": "/de/datenschutz/", "album": "/de/album/", "intro": "/de/intro/"},
 }
 
 # ---------------------------------------------------------------- Icons
@@ -36,13 +36,14 @@ ICON = {
     "youtube": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.3l5 2.7-5 2.7z" fill="currentColor"/></svg>',
     "instagram": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg>',
     "pinterest": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M11.2 12.2c-.9-.7-1.1-2-.5-3 .7-1.2 2.3-1.7 3.6-1.1 1.4.7 1.9 2.3 1.3 3.8-.6 1.6-2.1 2.6-3.4 2.1"/><path d="M12.4 10.5l-2.6 10"/></svg>',
+    "flickr": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="7.5" cy="12" r="3.6"/><circle cx="16.5" cy="12" r="3.6" fill="currentColor"/></svg>',
 }
 
 # ---------------------------------------------------------------- Texte
 T = {
     "en": {
         "skip": "Skip to content", "nav_label": "Main navigation", "lang_label": "Choose language",
-        "menu": "Open menu", "theme_light": "Switch to light theme",
+        "menu": "Open menu", "skip_intro": "Skip intro", "sound_on": "Sound on", "theme_light": "Switch to light theme",
         "nav": [("#work", "Photography"), ("#motion", "Motion"), ("#lab", "Lab"), ("#about", "About")],
         "guide": "Guide", "cta": "Start a project",
         "legal": "Legal notice", "privacy": "Privacy", "other_lang": "Deutsch", "home": "Back to home",
@@ -71,7 +72,7 @@ T = {
     },
     "de": {
         "skip": "Zum Inhalt springen", "nav_label": "Hauptnavigation", "lang_label": "Sprache wählen",
-        "menu": "Menü öffnen", "theme_light": "Helles Design aktivieren",
+        "menu": "Menü öffnen", "skip_intro": "Intro überspringen", "sound_on": "Ton an", "theme_light": "Helles Design aktivieren",
         "nav": [("#arbeiten", "Fotografie"), ("#motion", "Motion"), ("#labor", "Labor"), ("#ueber", "Über")],
         "guide": "Praxis", "cta": "Projekt anfragen",
         "legal": "Impressum", "privacy": "Datenschutz", "other_lang": "English", "home": "Zur Startseite",
@@ -102,6 +103,12 @@ T = {
 
 
 # ---------------------------------------------------------------- Bausteine
+# Startseite: Wer von außen kommt, sieht ggf. zuerst das Intro (Schalter im CMS).
+# Die Seite bleibt kurz unsichtbar, bis main.js die Einstellung gelesen hat.
+INTRO_GATE = """
+<script>try{var r=document.referrer,b=/bot|crawl|spider|slurp|lighthouse|headless/i.test(navigator.userAgent);if(!location.hash&&!b&&(!r||new URL(r).origin!==location.origin)&&!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.classList.add("intro-gate");setTimeout(function(){document.documentElement.classList.remove("intro-gate")},1500)}}catch(e){}</script>
+<style>.intro-gate body{visibility:hidden}</style>"""
+
 def head(lang, title, desc, page, alt_page):
     other = "de" if lang == "en" else "en"
     return f"""<!doctype html>
@@ -111,7 +118,7 @@ def head(lang, title, desc, page, alt_page):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
-<meta name="theme-color" content="#1C1220">
+<meta name="theme-color" content="#1C1220">{INTRO_GATE if page == "home" else ""}
 <script>try{{var m=localStorage.getItem("theme");if(m==="light"||m==="dark"){{document.documentElement.dataset.theme=m;}}if(m==="light")document.querySelector('meta[name="theme-color"]').content="#F6E7D8";}}catch(e){{}}</script>
 <link rel="alternate" hreflang="{lang}" href="{URL[lang].get(page, '/')}">
 <link rel="alternate" hreflang="{other}" href="{URL[other].get(alt_page, '/')}">
@@ -160,6 +167,18 @@ def header(lang, page, alt_page):
 """
 
 
+SOCIALS = (("youtube", "YouTube"), ("instagram", "Instagram"), ("pinterest", "Pinterest"), ("flickr", "Flickr"))
+
+
+def social_links(prefix=""):
+    """Links zu den Profilen; main.js setzt die Adressen aus den Einstellungen und blendet leere aus."""
+    out = []
+    for k, n in SOCIALS:
+        ident = f' id="{prefix}{k}"' if prefix else ""
+        out.append(f'<a{ident} data-social="{k}" href="#" aria-label="{n}" rel="noopener me" target="_blank" hidden>{ICON[k]}</a>')
+    return "".join(out)
+
+
 def footer_links(lang, page, alt_page, dark=True):
     t, u = T[lang], URL[lang]
     other = "de" if lang == "en" else "en"
@@ -172,6 +191,7 @@ def footer_links(lang, page, alt_page, dark=True):
 <a href="{u['privacy']}"{cur('privacy')}>{t['privacy']}</a>
 <a href="{URL[other][alt_page]}" lang="{other}">{t['other_lang']}</a>
 </nav>
+<div class="foot-socials" data-socials>{social_links()}</div>
 </footer>"""
 
 
@@ -303,9 +323,7 @@ def home(lang):
 <div class="contact-side">
 <a class="btn btn-dark" id="mail" href="mailto:">{t['mail_ph']}</a>
 <div class="socials">
-<a id="s-youtube" href="#" aria-label="YouTube" rel="noopener" target="_blank" hidden>{ICON['youtube']}</a>
-<a id="s-instagram" href="#" aria-label="Instagram" rel="noopener" target="_blank" hidden>{ICON['instagram']}</a>
-<a id="s-pinterest" href="#" aria-label="Pinterest" rel="noopener" target="_blank" hidden>{ICON['pinterest']}</a>
+{social_links('s-')}
 </div>
 </div>
 </div>
@@ -315,6 +333,27 @@ def home(lang):
 
 </main>
 {YEAR_JS}</body>
+</html>
+"""
+
+
+# ---------------------------------------------------------------- Intro
+def intro(lang):
+    t = T[lang]
+    home = URL[lang]["home"]
+    h = head(lang, f"Intro – {SITE}", t["desc"], "intro", "intro").replace(
+        '<meta name="theme-color"', '<meta name="robots" content="noindex, follow">\n<meta name="theme-color"', 1)
+    return h + f"""<main id="main" class="intro" data-intro data-next="{home}">
+{deco('ring', 'd-intro-ring')}
+<div class="intro-brand" aria-hidden="true">TRVR GDCHLD <span>VISUALS</span></div>
+<div class="intro-stage">
+<video id="intro-video" muted playsinline preload="auto" hidden></video>
+<div class="intro-fallback" id="intro-fallback"><img class="logo-dark" src="/assets/img/logo-full-dark.png" alt="{t['logo_alt']}" width="800" height="757"><img class="logo-light" src="/assets/img/logo-full-light.png" alt="{t['logo_alt']}" width="800" height="757"></div>
+</div>
+<button class="intro-sound" id="intro-sound" type="button" aria-pressed="false" hidden>{t['sound_on']}</button>
+<a class="intro-skip" id="intro-skip" href="{home}">{t['skip_intro']} {ICON['arrow']}</a>
+</main>
+</body>
 </html>
 """
 
@@ -645,6 +684,8 @@ if __name__ == "__main__":
     print("Erzeuge Seiten:")
     write("/", home("en"))
     write("/de/", home("de"))
+    write("/intro/", intro("en"))
+    write("/de/intro/", intro("de"))
     write("/album/", album("en"))
     write("/de/album/", album("de"))
     write("/guide/", guide("en"))
