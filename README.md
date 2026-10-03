@@ -10,8 +10,8 @@ Portfolio für Fotografie und Motion Graphics. Englisch ist die Standardsprache 
 
 ## 1. Online (Cloudflare Worker, kostenlos)
 
-Die Seite läuft als Cloudflare Worker mit Git-Anbindung:
-**https://trvrgdchld-website.trevorgoodchild1979.workers.dev**
+Die Seite läuft als Cloudflare Worker mit Git-Anbindung unter
+**https://trvrgdchld.com** (www.trvrgdchld.com und die alte workers.dev-Adresse leiten dorthin weiter).
 
 Jede Änderung im Repository (auch aus dem CMS) wird automatisch neu veröffentlicht.
 Die Einstellungen dafür stehen in `wrangler.jsonc`; in Cloudflare bleibt der Deploy-Befehl `npx wrangler deploy`.
@@ -24,17 +24,17 @@ Der Login läuft über dein GitHub-Konto. Dafür braucht es eine „OAuth App“
    (direkt: https://github.com/settings/applications/new)
 2. Ausfüllen:
    - **Application name:** `TRVR GDCHLD CMS`
-   - **Homepage URL:** `https://trvrgdchld-website.trevorgoodchild1979.workers.dev`
-   - **Authorization callback URL:** `https://trvrgdchld-website.trevorgoodchild1979.workers.dev/api/callback`
+   - **Homepage URL:** `https://trvrgdchld.com`
+   - **Authorization callback URL:** `https://trvrgdchld.com/api/callback`
 3. **Register application** → auf der nächsten Seite **Generate a new client secret**.
    Client ID und Client secret gleich in Cloudflare eintragen (das Secret wird nur einmal angezeigt).
 4. In Cloudflare: **Workers & Pages → trvrgdchld-website → Settings → Variables and Secrets → Add**:
    - `GITHUB_CLIENT_ID` = Client ID
    - `GITHUB_CLIENT_SECRET` = Client secret (Typ **Secret**)
    → **Deploy** bzw. Speichern.
-5. `…workers.dev/admin` öffnen → **Mit GitHub anmelden**.
+5. `https://trvrgdchld.com/admin` öffnen → **Mit GitHub anmelden**.
 
-> Wenn später eine eigene Domain dazukommt (z. B. `trvrgdchld.de`), in der OAuth App Homepage- und Callback-URL auf die neue Domain ändern.
+> Die Domain steht außerdem in `tools/build.py` (`SITE_URL`) und in `public/admin/config.yml` (`base_url`).
 
 ## 3. Inhalte pflegen
 

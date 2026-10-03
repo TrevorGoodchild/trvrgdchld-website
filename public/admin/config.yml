@@ -1,14 +1,13 @@
 # CMS-Einstellungen der Verwaltungsoberfläche unter /admin (Sveltia CMS)
 # und der Reserve unter /admin/decap/ (Decap CMS) – beide lesen diese Datei.
 # Login über GitHub, abgewickelt vom Cloudflare Worker (src/worker.js, /api/auth).
-# Bei eigener Domain: base_url unten auf die neue Adresse ändern.
 # Dateipfade beziehen sich auf das Repository, daher "public/…".
 
 backend:
   name: github
   repo: TrevorGoodchild/trvrgdchld-website
   branch: main
-  base_url: https://trvrgdchld-website.trevorgoodchild1979.workers.dev
+  base_url: https://trvrgdchld.com
   auth_endpoint: api/auth
 locale: de
 media_folder: public/assets/uploads

@@ -103,33 +103,42 @@ T = {
 
 
 # ---------------------------------------------------------------- Bausteine
+SITE_URL = "https://trvrgdchld.com"
+# Alte Adressen (workers.dev, www.) leiten auf die Hauptdomain weiter.
+HOST_REDIRECT = ('<script>(function(h){if(/\\.workers\\.dev$/.test(h)||h==="www.trvrgdchld.com")'
+                 'location.replace("' + SITE_URL + '"+location.pathname+location.search+location.hash)})(location.hostname)</script>')
 # Startseite: Wer von außen kommt, sieht ggf. zuerst das Intro (Schalter im CMS).
 # Die Seite bleibt kurz unsichtbar, bis main.js die Einstellung gelesen hat.
 INTRO_GATE = """
 <script>try{var r=document.referrer,b=/bot|crawl|spider|slurp|lighthouse|headless/i.test(navigator.userAgent);if(!location.hash&&!b&&(!r||new URL(r).origin!==location.origin)&&!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.classList.add("intro-gate");setTimeout(function(){document.documentElement.classList.remove("intro-gate")},1500)}}catch(e){}</script>
 <style>.intro-gate body{visibility:hidden}</style>"""
 
-def head(lang, title, desc, page, alt_page):
+def head(lang, title, desc, page, alt_page, canonical=True):
     other = "de" if lang == "en" else "en"
+    path = URL[lang].get(page, "/")
+    canon = f'\n<link rel="canonical" href="{SITE_URL}{path}">\n<meta property="og:url" content="{SITE_URL}{path}">' if canonical else ""
     return f"""<!doctype html>
 <html lang="{lang}">
 <head>
 <meta charset="utf-8">
+{HOST_REDIRECT}
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <meta name="theme-color" content="#1C1220">{INTRO_GATE if page == "home" else ""}
 <script>try{{var m=localStorage.getItem("theme");if(m==="light"||m==="dark"){{document.documentElement.dataset.theme=m;}}if(m==="light")document.querySelector('meta[name="theme-color"]').content="#F6E7D8";}}catch(e){{}}</script>
-<link rel="alternate" hreflang="{lang}" href="{URL[lang].get(page, '/')}">
-<link rel="alternate" hreflang="{other}" href="{URL[other].get(alt_page, '/')}">
-<link rel="alternate" hreflang="x-default" href="{URL['en'].get(alt_page if lang == 'de' else page, '/')}">
+<link rel="alternate" hreflang="{lang}" href="{SITE_URL}{URL[lang].get(page, '/')}">
+<link rel="alternate" hreflang="{other}" href="{SITE_URL}{URL[other].get(alt_page, '/')}">
+<link rel="alternate" hreflang="x-default" href="{SITE_URL}{URL['en'].get(alt_page if lang == 'de' else page, '/')}">{canon}
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 <link rel="preload" href="/assets/fonts/syne-var.woff" as="font" type="font/woff" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css">
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}">
-<meta property="og:image" content="/assets/img/icon-512.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TRVR GDCHLD Visuals">
+<meta property="og:image" content="{SITE_URL}/assets/img/logo-full-dark.png">
 <script src="/assets/js/main.js" defer></script>
 </head>
 <body>
@@ -341,7 +350,7 @@ def home(lang):
 def intro(lang):
     t = T[lang]
     home = URL[lang]["home"]
-    h = head(lang, f"Intro – {SITE}", t["desc"], "intro", "intro").replace(
+    h = head(lang, f"Intro – {SITE}", t["desc"], "intro", "intro", canonical=False).replace(
         '<meta name="theme-color"', '<meta name="robots" content="noindex, follow">\n<meta name="theme-color"', 1)
     return h + f"""<main id="main" class="intro" data-intro data-next="{home}">
 {deco('ring', 'd-intro-ring')}
@@ -363,7 +372,7 @@ def album(lang):
     t = T[lang]
     work = "#work" if lang == "en" else "#arbeiten"
     back = URL[lang]["home"] + work
-    return head(lang, f"{t['album_label']} – {SITE}", t["desc"], "album", "album") + header(lang, "album", "album") + f"""<main id="main" data-album-page>
+    return head(lang, f"{t['album_label']} – {SITE}", t["desc"], "album", "album", canonical=False) + header(lang, "album", "album") + f"""<main id="main" data-album-page>
 
 <section class="album-hero has-deco">
 {deco('scale-v', 'd-edge-l')}{deco('af', 'd-album-af')}
@@ -667,7 +676,7 @@ def legal_page(lang, page, kind, title, desc):
 
 
 def not_found():
-    return head("en", f"Page not found – {SITE}", "Page not found", "home", "home") + header("en", "404", "home") + f"""<main id="main" class="wrap nf">
+    return head("en", f"Page not found – {SITE}", "Page not found", "home", "home", canonical=False).replace('<meta name="theme-color"', '<meta name="robots" content="noindex">\n<meta name="theme-color"', 1) + header("en", "404", "home") + f"""<main id="main" class="wrap nf">
 {deco('cross', 'd-nf-cross')}
 <div class="legal">
 <div><div class="eyebrow">404</div><h1>Out of frame.</h1>
@@ -695,4 +704,13 @@ if __name__ == "__main__":
     write("/de/impressum/", legal_page("de", "legal", "impressum_de", "Impressum", "Impressum von TRVR GDCHLD Visuals."))
     write("/de/datenschutz/", legal_page("de", "privacy", "datenschutz_de", "Datenschutz", "Datenschutzerklärung von TRVR GDCHLD Visuals."))
     (ROOT / "404.html").write_text(not_found(), encoding="utf-8")
+    pages = [("home", "home"), ("guide", "guide"), ("legal", "legal"), ("privacy", "privacy")]
+    urls = []
+    for key, _ in pages:
+        alts = "".join(f'<xhtml:link rel="alternate" hreflang="{l}" href="{SITE_URL}{URL[l][key]}"/>' for l in ("en", "de"))
+        for l in ("en", "de"):
+            urls.append(f"<url><loc>{SITE_URL}{URL[l][key]}</loc>{alts}</url>")
+    (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + "\n".join(urls) + "\n</urlset>\n", encoding="utf-8")
+    (ROOT / "robots.txt").write_text(f"User-agent: *\nDisallow: /admin/\nDisallow: /api/\n\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
+    print("   sitemap.xml, robots.txt")
     print("   404.html\nFertig.")
