@@ -1,16 +1,6 @@
 {
   "albums": [
     {
-      "slug": "waldbuehne-berlin-2026",
-      "title_en": "Zach Brian – Waldbühne Berlin – 2026",
-      "title_de": "Zach Brian – Waldbühne Berlin – 2026",
-      "category": "event",
-      "date": "2026-05-31",
-      "place": "Waldbühne, Berlin",
-      "cover": "/assets/uploads/20260531_183153.jpg",
-      "text_en": "",
-      "text_de": "",
-      "camera": "Samsung Galaxy A52s",
       "photos": [
         {
           "image": "/assets/uploads/20260531_183153.jpg",
@@ -32,33 +22,62 @@
           "shutter": "1/360 s",
           "iso": "ISO 25"
         }
-      ]
+      ],
+      "camera": "Samsung Galaxy A52s",
+      "place": "Waldbühne, Berlin",
+      "title_de": "Zach Brian – Waldbühne Berlin – 2026",
+      "slug": "waldbuehne-berlin-2026",
+      "date": "2026-05-31",
+      "title_en": "Zach Brian – Waldbühne Berlin – 2026",
+      "text_de": "",
+      "cover": "/assets/uploads/20260531_183153.jpg",
+      "text_en": "",
+      "category": "event"
     },
     {
+      "photos": [
+        {
+          "image": "/assets/uploads/p20240608_052410.jpg"
+        },
+        {
+          "image": "/assets/uploads/p20240616_165821.jpg"
+        },
+        {
+          "image": "/assets/uploads/p20240616_163400.jpg"
+        },
+        {
+          "image": "/assets/uploads/p20240525_190910.jpg"
+        },
+        {
+          "image": "/assets/uploads/p20240525_191042.jpg"
+        },
+        {
+          "image": "/assets/uploads/p20240608_052456.jpg"
+        }
+      ],
+      "camera": "Samsung - A52",
+      "place": "Eschelbach",
+      "title_de": "Weinberge - Eschelbach",
       "slug": "landschaft",
-      "title_en": "[Album title]",
-      "title_de": "[Albumtitel]",
-      "category": "landscape",
       "date": "",
-      "place": "",
+      "title_en": "Vineyards - Eschelbach",
+      "text_de": "",
       "cover": "",
       "text_en": "",
-      "text_de": "",
-      "camera": "LUMIX G70",
-      "photos": []
+      "category": "landscape"
     },
     {
-      "slug": "portraits",
-      "title_en": "[Album title]",
-      "title_de": "[Albumtitel]",
-      "category": "portrait",
-      "date": "",
+      "photos": [],
+      "camera": "LUMIX G70",
       "place": "",
+      "title_de": "[Albumtitel]",
+      "slug": "portraits",
+      "date": "",
+      "title_en": "[Album title]",
+      "text_de": "",
       "cover": "",
       "text_en": "",
-      "text_de": "",
-      "camera": "LUMIX G70",
-      "photos": []
+      "category": "portrait"
     }
   ]
 }
