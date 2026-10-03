@@ -48,7 +48,7 @@ Unter `/admin` gibt es diese Bereiche:
 | **Rechtliches** | Deine Angaben fürs Impressum, weitere Impressum-Abschnitte, Datenschutzerklärung (DE/EN) |
 | **Einstellungen** | Name, E-Mail, Ort, „Verfügbar ab“, Portraitfoto, Über-mich-Text (EN/DE), Showreel, Social-Media-Links |
 
-Jedes Album hat eine eigene Seite: `/album/?a=<kurzname>` (Deutsch: `/de/album/?a=<kurzname>`).
+Jedes Album hat eine eigene Seite: `/album/?a=<kurzname>` (Deutsch: `/de/album/?a=<kurzname>`). Ein bestimmtes Foto verlinkst du mit `#<nummer>` am Ende, z. B. `…?a=<kurzname>#3`.
 
 Nach dem **Veröffentlichen** im CMS ist die Änderung nach ca. einer Minute live.
 

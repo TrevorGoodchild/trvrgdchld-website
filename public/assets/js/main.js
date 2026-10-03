@@ -18,7 +18,7 @@
       topics: { shutter: "Shutter speed", aperture: "Aperture", iso: "ISO", wb: "White balance", focal: "Focal length" },
       cmpLabel: "Divider between A and B", cmpHint: "Drag the line or use the arrow keys. Tap a card to change the image.",
       cmpText: function (p) { return p + " % A visible"; },
-      pickFor: "Card sets", left: "left", right: "right", histo: "HISTOGRAM",
+      pickFor: "Card sets", left: "left", right: "right", histo: "HISTOGRAM", brightness: "Image brightness",
       evLabel: "Brightness B vs. A", evNone: "no comparison", ref: "Reference", cardLabel: function (v, side) { return v + (side ? " – shown " + side : ""); },
       menuOpen: "Open menu", menuClose: "Close menu",
       themeLight: "Switch to light theme", themeDark: "Switch to dark theme"
@@ -35,7 +35,7 @@
       topics: { shutter: "Verschlusszeit", aperture: "Blende", iso: "ISO", wb: "Weißabgleich", focal: "Brennweite" },
       cmpLabel: "Trennlinie zwischen A und B", cmpHint: "Linie ziehen oder Pfeiltasten nutzen. Karte antippen wechselt das Bild.",
       cmpText: function (p) { return p + " % A sichtbar"; },
-      pickFor: "Karte setzt", left: "links", right: "rechts", histo: "HISTOGRAMM",
+      pickFor: "Karte setzt", left: "links", right: "rechts", histo: "HISTOGRAMM", brightness: "Bildhelligkeit",
       evLabel: "Helligkeit B zu A", evNone: "kein Vergleich", ref: "Referenz", cardLabel: function (v, side) { return v + (side ? " – angezeigt " + side : ""); },
       menuOpen: "Menü öffnen", menuClose: "Menü schließen",
       themeLight: "Helles Design aktivieren", themeDark: "Dunkles Design aktivieren"
@@ -152,6 +152,70 @@
     return [ph.camera || fallbackCam, ph.focal, ph.aperture, ph.shutter, ph.iso].filter(Boolean).join(" · ");
   }
 
+  /* Shared camera-display helpers (album viewer + full screen) */
+  var Cam = {
+    pad: function (n) { return String(n).padStart(2, "0"); },
+    analyse: function (img) {   // luminance histogram + mean brightness in EV vs. 18 % grey
+      try {
+        var c = document.createElement("canvas"), w = 160, h = Math.max(1, Math.round(160 * img.naturalHeight / img.naturalWidth));
+        c.width = w; c.height = h;
+        var ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, w, h);
+        var d = ctx.getImageData(0, 0, w, h).data, bins = new Array(48).fill(0), lin = 0, n = 0;
+        for (var i = 0; i < d.length; i += 4) {
+          var y = (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 255;
+          bins[Math.min(47, Math.floor(y * 48))]++;
+          lin += y <= 0.04045 ? y / 12.92 : Math.pow((y + 0.055) / 1.055, 2.4); n++;
+        }
+        var sm = bins.map(function (_, i) { var t = 0, k2 = 0; for (var k = -2; k <= 2; k++) if (bins[i + k] !== undefined) { t += bins[i + k]; k2++; } return t / k2; });
+        var mx = Math.max.apply(null, sm) || 1;
+        return { hist: sm.map(function (v) { return v / mx; }), ev: Math.log(Math.max(lin / n, 1e-4) / 0.18) / Math.LN2 };
+      } catch (e) { return null; }
+    },
+    histo: function (box, label, h) {
+      var svg = '<svg viewBox="0 0 240 120" preserveAspectRatio="none" aria-hidden="true"><line class="g" x1="66" y1="16" x2="66" y2="104"/><line class="g" x1="120" y1="16" x2="120" y2="104"/><line class="g" x1="174" y1="16" x2="174" y2="104"/><line class="base" x1="12" y1="104" x2="228" y2="104"/>';
+      if (h) svg += '<polyline class="hb" points="' + h.map(function (v, i) { return (12 + i * 216 / 47).toFixed(1) + "," + (104 - v * 80).toFixed(1); }).join(" ") + '"/>';
+      box.innerHTML = '<span class="vf-histo-l">' + label + "</span>" + svg + "</svg>";
+    },
+    evText: function (ev) {
+      var t = Math.round(ev * 3), w = Math.floor(Math.abs(t) / 3), r = Math.abs(t) % 3;
+      if (t === 0) return "±0 EV";
+      return (t > 0 ? "+" : "−") + (w ? w : "") + (r === 1 ? "⅓" : r === 2 ? "⅔" : "") + " EV";
+    },
+    expo: function (box, label, ev) {
+      var ticks = "", x = ev === null || isNaN(ev) ? null : 20 + (Math.max(-3, Math.min(3, ev)) + 3) / 6 * 560;
+      for (var t = -9; t <= 9; t++) {
+        var tx = 20 + (t + 9) / 18 * 560, major = t % 3 === 0;
+        ticks += '<line x1="' + tx + '" y1="34" x2="' + tx + '" y2="' + (major ? 20 : 27) + '"/>';
+        if (major) ticks += '<text x="' + tx + '" y="54">' + (t > 0 ? "+" : t < 0 ? "−" : "") + Math.abs(t / 3) + "</text>";
+      }
+      box.innerHTML = '<span class="vf-expo-l">' + label + (x === null ? "" : " <b>" + Cam.evText(ev) + "</b>") + "</span>" +
+        '<svg viewBox="0 0 600 60" aria-hidden="true"><line x1="20" y1="34" x2="580" y2="34"/>' + ticks +
+        (x === null ? "" : '<path class="mk" d="M' + (x - 7) + " 4 L" + (x + 7) + " 4 L" + x + ' 14 Z"/>') + "</svg>";
+    },
+    ratio: function (w, h) {
+      var r = w / h;
+      return [["4:3", 4 / 3], ["3:2", 1.5], ["16:9", 16 / 9], ["1:1", 1], ["3:4", 0.75], ["2:3", 2 / 3], ["9:16", 9 / 16]]
+        .reduce(function (b, x) { return Math.abs(x[1] - r) < Math.abs(b[1] - r) ? x : b; })[0];
+    },
+    status: function (box, items, remaining) {
+      box.textContent = "";
+      items.forEach(function (x, i) {
+        if (!Array.isArray(x)) x = [x, ""];
+        box.appendChild(el("span", { class: i === 0 ? "mode" : x[1], text: x[0] }));
+      });
+      box.appendChild(el("span", { class: "batt" }, [el("i"), el("i"), el("i")]));
+      box.appendChild(el("span", { text: String(remaining) }));
+    },
+    data: function (box, ph) {
+      box.textContent = "";
+      var sh = String(ph.shutter || "").replace(/\s*s$/i, ""), ap = String(ph.aperture || ""), apn = (ap.match(/\d+(?:[.,]\d+)?/) || [""])[0];
+      [sh, apn ? "F" + apn.replace(",", ".") : ap, ph.iso, ph.wb, ph.focal].filter(Boolean).forEach(function (v, i) {
+        if (i) box.appendChild(el("i", { class: "dot", "aria-hidden": "true" }));
+        box.appendChild(el("span", { text: v }));
+      });
+    }
+  };
+
   /* Album page: /album/?a=slug */
   if (document.querySelector("[data-album-page]")) {
     // keep the album when switching language
@@ -171,39 +235,90 @@
       if (t) { txt.textContent = t; txt.hidden = false; }
       box.textContent = "";
       if (!photos.length) { box.appendChild(el("p", { class: "empty-note", text: L.emptyAlbum })); return; }
-      photos.forEach(function (ph, i) {
-        var specs = specsOf(ph, al.camera);
-        var btn = el("button", { type: "button", class: "album-photo", "aria-label": (ph.caption || title) + " – " + (i + 1) + "/" + photos.length }, [
-          el("img", { src: ph.image, alt: ph.alt || ph.caption || "", loading: i < 4 ? "eager" : "lazy", decoding: "async" })
-        ]);
-        btn.addEventListener("click", function () { openLightbox(i); });
-        box.appendChild(el("figure", { class: "album-item" }, [btn,
-          (ph.caption || specs) ? el("figcaption", null, [ph.caption ? el("b", { text: ph.caption }) : null, specs ? el("span", { text: specs }) : null]) : null]));
-      });
-      // Lightbox
-      var lb = document.getElementById("lightbox"), img = lb.querySelector("img"), cap = lb.querySelector("figcaption"), cur = 0, lastFocus = null;
-      function show(i) {
+
+      /* Viewer (layout A): viewfinder corners, frame counter, data bar */
+      var av = document.getElementById("av"), avImg = document.getElementById("av-img"), cur = 0, info = {};
+      av.hidden = false;
+      var cam = function (ph) { return ph.camera || al.camera || ""; };
+      function analyseOnce(src, img, cb) {
+        if (info[src]) return cb(info[src]);
+        var go = function () { info[src] = Cam.analyse(img); cb(info[src]); };
+        if (img.complete && img.naturalWidth) go(); else img.addEventListener("load", go, { once: true });
+      }
+      function select(i, focusThumb) {
         cur = (i + photos.length) % photos.length;
+        var ph = photos[cur];
+        avImg.src = ph.image; avImg.alt = ph.alt || ph.caption || title + " – " + (cur + 1);
+        document.getElementById("av-counter").innerHTML = "<b>" + Cam.pad(cur + 1) + "</b> / " + Cam.pad(photos.length);
+        Cam.data(document.getElementById("av-data"), ph);
+        document.getElementById("av-cap").textContent = [ph.caption, cam(ph)].filter(Boolean).join("  ·  ");
+        box.querySelectorAll(".strip-item").forEach(function (t, k) {
+          if (k === cur) { t.setAttribute("aria-current", "true"); if (focusThumb) t.focus(); t.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" }); }
+          else t.removeAttribute("aria-current");
+        });
+        try { history.replaceState(null, "", location.pathname + location.search + (cur ? "#" + (cur + 1) : "")); } catch (e) {}
+      }
+      photos.forEach(function (ph, i) {
+        var t = el("button", { type: "button", class: "strip-item", "aria-label": (ph.caption || title) + " – " + (i + 1) + "/" + photos.length }, [
+          el("img", { src: ph.image, alt: "", loading: i < 8 ? "eager" : "lazy", decoding: "async" }),
+          el("span", { text: Cam.pad(i + 1) })
+        ]);
+        t.addEventListener("click", function () { select(i); });
+        box.appendChild(t);
+      });
+      av.querySelector(".av-prev").addEventListener("click", function () { select(cur - 1); });
+      av.querySelector(".av-next").addEventListener("click", function () { select(cur + 1); });
+      if (photos.length < 2) av.querySelectorAll(".av-nav").forEach(function (n) { n.hidden = true; });
+      document.getElementById("av-photo").addEventListener("click", function () { openLightbox(cur); });
+      var sx = null, frame = av.querySelector(".av-frame");
+      frame.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
+      frame.addEventListener("touchend", function (e) { if (sx === null) return; var dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) select(cur + (dx < 0 ? 1 : -1)); sx = null; });
+      document.addEventListener("keydown", function (e) {
+        if (!lb.hidden || e.altKey || e.ctrlKey || e.metaKey || /input|textarea|select/i.test((e.target.tagName || ""))) return;
+        if (e.key === "ArrowLeft") select(cur - 1, e.target.classList && e.target.classList.contains("strip-item"));
+        else if (e.key === "ArrowRight") select(cur + 1, e.target.classList && e.target.classList.contains("strip-item"));
+      });
+
+      /* Full screen (layout B): status bar, AF frame, live histogram, brightness scale */
+      var lb = document.getElementById("lightbox"), img = lb.querySelector("img"), cap = lb.querySelector("figcaption"), lastFocus = null;
+      function show(i) {
+        select(i);
         var ph = photos[cur];
         img.src = ph.image; img.alt = ph.alt || ph.caption || "";
         cap.textContent = [ph.caption, specsOf(ph, al.camera)].filter(Boolean).join("  ·  ");
-        var cnt = document.getElementById("lb-count");
-        if (cnt) cnt.innerHTML = "<b>" + String(cur + 1).padStart(2, "0") + "</b> / " + String(photos.length).padStart(2, "0");
+        var st = document.getElementById("lb-status");
+        Cam.status(st, [L.statusMode || "M", "L", ["–", "ratio"], "AFS", ph.wb || "AWB", "STD."], photos.length - cur - 1);
+        Cam.histo(document.getElementById("lb-histo"), L.histo, null);
+        Cam.expo(document.getElementById("lb-expo"), L.brightness, null);
+        analyseOnce(ph.image, img, function (r) {
+          if (photos[cur].image !== ph.image) return;
+          var rs = st.querySelector(".ratio"); if (rs && img.naturalWidth) rs.textContent = Cam.ratio(img.naturalWidth, img.naturalHeight);
+          if (r) { Cam.histo(document.getElementById("lb-histo"), L.histo, r.hist); Cam.expo(document.getElementById("lb-expo"), L.brightness, r.ev); }
+        });
       }
-      function openLightbox(i) { lastFocus = document.activeElement; show(i); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".lb-close").focus(); }
+      function openLightbox(i) { lastFocus = document.activeElement; lb.hidden = false; show(i); document.body.style.overflow = "hidden"; lb.querySelector(".lb-close").focus(); }
       function close() { lb.hidden = true; document.body.style.overflow = ""; if (lastFocus) lastFocus.focus(); }
       lb.querySelector(".lb-close").addEventListener("click", close);
       lb.querySelector(".lb-prev").addEventListener("click", function () { show(cur - 1); });
       lb.querySelector(".lb-next").addEventListener("click", function () { show(cur + 1); });
-      lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
+      if (photos.length < 2) { lb.querySelector(".lb-prev").hidden = true; lb.querySelector(".lb-next").hidden = true; }
+      lb.addEventListener("click", function (e) { if (e.target === lb || e.target.classList.contains("lb-stage")) close(); });
       lb.addEventListener("keydown", function (e) {
         if (e.key === "Escape") close();
         else if (e.key === "ArrowLeft") show(cur - 1);
         else if (e.key === "ArrowRight") show(cur + 1);
+        else if (e.key === "Tab") {   // keep focus inside the dialog
+          var f = [].slice.call(lb.querySelectorAll("button:not([hidden])")), k = f.indexOf(document.activeElement);
+          if (e.shiftKey && k <= 0) { f[f.length - 1].focus(); e.preventDefault(); }
+          else if (!e.shiftKey && k === f.length - 1) { f[0].focus(); e.preventDefault(); }
+        }
       });
       var tx = null;
       lb.addEventListener("touchstart", function (e) { tx = e.touches[0].clientX; }, { passive: true });
       lb.addEventListener("touchend", function (e) { if (tx === null) return; var dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) show(cur + (dx < 0 ? 1 : -1)); tx = null; });
+
+      var start = parseInt((location.hash || "").slice(1), 10);
+      select(start >= 1 && start <= photos.length ? start - 1 : 0);
     }).catch(function () {});
     return;
   }

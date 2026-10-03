@@ -59,6 +59,7 @@ T = {
         "reel_btn": "Load and play showreel",
         "reel_note": 'Clicking loads the video from YouTube, which transfers data to YouTube – see the <a href="/privacy/#youtube">privacy policy</a>.',
         "playlists_h3": "Playlists",
+        "album_full": "Open photo full screen", "album_strip": "All photos in this album",
         "album_back": "All albums", "album_photos": "photos", "album_label": "Album",
         "lab_eyebrow": "03 — Lab", "lab_h2": "Every series starts<br>with a card.",
         "lab_p": "Before every test shot, I hold a card with the settings up to the lens. That way it stays clear what shutter speed, aperture, ISO and white balance do to a subject.",
@@ -87,6 +88,7 @@ T = {
         "reel_btn": "Showreel laden und abspielen",
         "reel_note": 'Mit dem Klick wird das Video von YouTube geladen. Dabei werden Daten an YouTube übertragen – mehr dazu im <a href="/de/datenschutz/#youtube">Datenschutz</a>.',
         "playlists_h3": "Playlists",
+        "album_full": "Foto im Vollbild öffnen", "album_strip": "Alle Fotos dieses Albums",
         "album_back": "Alle Alben", "album_photos": "Fotos", "album_label": "Album",
         "lab_eyebrow": "03 — Labor", "lab_h2": "Jede Serie beginnt<br>mit einer Karte.",
         "lab_p": "Vor jedem Testbild halte ich eine Karte mit den Einstellungen ins Bild. So bleibt nachvollziehbar, was Verschlusszeit, Blende, ISO und Weißabgleich mit einem Motiv machen.",
@@ -334,9 +336,19 @@ def album(lang):
 </div>
 </section>
 
-<section class="section album-body">
+<section class="section album-body has-deco">
+{deco('ring', 'd-alb-ring')}{deco('arc-f', 'd-alb-arc')}{deco('scale-v', 'd-edge-l')}
 <div class="wrap">
-<div class="album-photos" id="album-photos"></div>
+<div class="av" id="av" hidden>
+<div class="vf-counter av-counter" id="av-counter" aria-hidden="true"></div>
+<div class="av-frame vf-frame"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+<button class="av-photo" id="av-photo" type="button" aria-label="{t['album_full']}"><img id="av-img" alt=""></button>
+<button class="av-nav av-prev" type="button" aria-label="{'Previous photo' if lang == 'en' else 'Vorheriges Foto'}">‹</button>
+<button class="av-nav av-next" type="button" aria-label="{'Next photo' if lang == 'en' else 'Nächstes Foto'}">›</button>
+</div>
+<div class="av-info"><div class="vf-row" id="av-data"></div><p class="av-cap" id="av-cap" aria-live="polite"></p></div>
+</div>
+<div class="strip" id="album-photos" aria-label="{t['album_strip']}"></div>
 </div>
 </section>
 
@@ -351,10 +363,13 @@ def album(lang):
 </section>
 
 <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="{t['album_label']}">
-<div class="lb-count" id="lb-count"></div>
+{deco('tilt', 'd-lb-tilt')}{deco('arc-mm', 'd-lb-arc')}
+<div class="vf-status lb-status" id="lb-status" aria-hidden="true"></div>
+<div class="lb-stage"><figure><span class="lb-shot"><img alt=""><span class="cmp-af lb-af" aria-hidden="true"><i></i></span></span><figcaption></figcaption></figure></div>
+<div class="vf-expo lb-expo" id="lb-expo" aria-hidden="true"></div>
+<div class="lb-side"><div class="vf-histo" id="lb-histo" aria-hidden="true"></div></div>
 <button class="lb-close" type="button" aria-label="{'Close' if lang == 'en' else 'Schließen'}">×</button>
 <button class="lb-prev" type="button" aria-label="{'Previous photo' if lang == 'en' else 'Vorheriges Foto'}">‹</button>
-<figure><img alt=""><figcaption></figcaption></figure>
 <button class="lb-next" type="button" aria-label="{'Next photo' if lang == 'en' else 'Nächstes Foto'}">›</button>
 </div>
 

@@ -125,6 +125,11 @@ collections:
           widget: string
           required: false
           hint: z. B. ISO 200
+        - name: wb
+          label: Weißabgleich
+          widget: string
+          required: false
+          hint: optional, z. B. AWB oder 5500 K
 - name: playlists
   label: Motion-Playlists
   editor:
