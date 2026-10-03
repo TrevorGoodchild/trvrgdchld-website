@@ -44,7 +44,7 @@ Unter `/admin` gibt es diese Bereiche:
 |---|---|
 | **Foto-Alben** | Alben anlegen (Titel DE/EN, Kurzname für die Adresse, Kategorie, Datum, Ort, Titelbild, Beschreibung, Kamera) und darin Fotos mit Bildunterschrift und Aufnahmedaten |
 | **Motion-Playlists** | YouTube-Playlists mit Titel, Text und eigenem Vorschaubild |
-| **Labor** | Die Vorhaltekarten der aktuellen Testreihe |
+| **Labor** | Testreihen (z. B. Verschlusszeit, Blende): je Bild Foto, Verschlusszeit, Blende, ISO, Weißabgleich, Brennweite. Ein Bild als „Referenz“ markieren – es steht im Vergleich links. Histogramm und Helligkeitsskala rechnet die Seite selbst aus. |
 | **Rechtliches** | Deine Angaben fürs Impressum, weitere Impressum-Abschnitte, Datenschutzerklärung (DE/EN) |
 | **Einstellungen** | Name, E-Mail, Ort, „Verfügbar ab“, Portraitfoto, Über-mich-Text (EN/DE), Showreel, Social-Media-Links |
 
@@ -74,5 +74,7 @@ src/worker.js                Cloudflare Worker: liefert public/ aus + CMS-Login 
 wrangler.jsonc               Cloudflare-Einstellungen
 tools/build.py               erzeugt die HTML-Seiten
 ```
+
+Design-Elemente (Skalen, Objektivbögen, Histogramm …) liegen als SVG-Sprite in `public/assets/img/deco.svg` und färben sich automatisch passend zum hellen/dunklen Design.
 
 Schriften: Syne, DM Sans und JetBrains Mono unter der SIL Open Font License (siehe `assets/fonts/OFL-*.txt`).

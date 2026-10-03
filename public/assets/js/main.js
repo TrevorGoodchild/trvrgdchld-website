@@ -1,6 +1,6 @@
 /* TRVR GDCHLD Visuals – Seitenlogik
    Liest die Inhalte aus /content/*.json (dort pflegt das CMS die Daten)
-   und baut Fotos, Motion-Projekte und Laborkarten auf. */
+   und baut Fotos, Motion-Projekte und Testreihen auf. */
 (function () {
   "use strict";
 
@@ -14,7 +14,12 @@
       playPlaylist: "Load and play playlist", noPlaylist: "This playlist will be available soon.", months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
       watch: "Watch on YouTube",
       noReel: "The showreel will be available here soon.",
-      series: "SERIES", shutter: "SHUTTER · MECH.",
+      series: "SERIES", photo_ph: "[PHOTO]",
+      topics: { shutter: "Shutter speed", aperture: "Aperture", iso: "ISO", wb: "White balance", focal: "Focal length" },
+      cmpLabel: "Divider between A and B", cmpHint: "Drag the line or use the arrow keys. Tap a card to change the image.",
+      cmpText: function (p) { return p + " % A visible"; },
+      pickFor: "Card sets", left: "left", right: "right", histo: "HISTOGRAM",
+      evLabel: "Brightness B vs. A", evNone: "no comparison", ref: "Reference", cardLabel: function (v, side) { return v + (side ? " – shown " + side : ""); },
       menuOpen: "Open menu", menuClose: "Close menu",
       themeLight: "Switch to light theme", themeDark: "Switch to dark theme"
     },
@@ -26,7 +31,12 @@
       playPlaylist: "Playlist laden und abspielen", noPlaylist: "Diese Playlist ist bald verfügbar.", months: ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],
       watch: "Auf YouTube ansehen",
       noReel: "Das Showreel ist hier bald zu sehen.",
-      series: "SERIE", shutter: "VERSCHLUSS · MECH.",
+      series: "SERIE", photo_ph: "[FOTO]",
+      topics: { shutter: "Verschlusszeit", aperture: "Blende", iso: "ISO", wb: "Weißabgleich", focal: "Brennweite" },
+      cmpLabel: "Trennlinie zwischen A und B", cmpHint: "Linie ziehen oder Pfeiltasten nutzen. Karte antippen wechselt das Bild.",
+      cmpText: function (p) { return p + " % A sichtbar"; },
+      pickFor: "Karte setzt", left: "links", right: "rechts", histo: "HISTOGRAMM",
+      evLabel: "Helligkeit B zu A", evNone: "kein Vergleich", ref: "Referenz", cardLabel: function (v, side) { return v + (side ? " – angezeigt " + side : ""); },
       menuOpen: "Menü öffnen", menuClose: "Menü schließen",
       themeLight: "Helles Design aktivieren", themeDark: "Dunkles Design aktivieren"
     }
@@ -176,7 +186,9 @@
         cur = (i + photos.length) % photos.length;
         var ph = photos[cur];
         img.src = ph.image; img.alt = ph.alt || ph.caption || "";
-        cap.textContent = [ph.caption, specsOf(ph, al.camera), (cur + 1) + " / " + photos.length].filter(Boolean).join("  ·  ");
+        cap.textContent = [ph.caption, specsOf(ph, al.camera)].filter(Boolean).join("  ·  ");
+        var cnt = document.getElementById("lb-count");
+        if (cnt) cnt.innerHTML = "<b>" + String(cur + 1).padStart(2, "0") + "</b> / " + String(photos.length).padStart(2, "0");
       }
       function openLightbox(i) { lastFocus = document.activeElement; show(i); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".lb-close").focus(); }
       function close() { lb.hidden = true; document.body.style.overflow = ""; if (lastFocus) lastFocus.focus(); }
@@ -308,18 +320,251 @@
     });
   }).catch(function () {});
 
-  /* Lab cards */
-  getJSON("/content/lab.json").then(function (data) {
-    var box = document.getElementById("cards");
-    var cards = data.cards || [];
-    box.textContent = "";
-    cards.forEach(function (c, i) {
-      var n = String(i + 1).padStart(2, "0") + "/" + String(cards.length).padStart(2, "0");
-      box.appendChild(el("div", { class: "card" + (c.highlight ? " hl" : "") }, [
-        el("div", { class: "row" }, [el("span", { text: L.series + " " + (data.series || "") }), el("span", { text: n })]),
-        el("div", { class: "val", text: c.value || "" }),
-        el("div", { class: "meta" }, [el("span", { text: L.shutter }), el("br"), el("span", { text: [c.aperture, c.iso].filter(Boolean).join(" · ") })])
-      ]));
+  /* Lab: test series with A/B comparison (viewfinder layout) */
+  var testsBox = document.getElementById("tests");
+  if (testsBox) getJSON("/content/lab.json").then(function (data) {
+    var series = data.series;
+    if (!Array.isArray(series)) {   // old format: { series: "A", cards: [...] }
+      series = [{ id: data.series || "A", topic: "shutter", frames: (data.cards || []).map(function (c) {
+        return { shutter: c.value, aperture: c.aperture, iso: c.iso, reference: c.highlight };
+      }) }];
+    }
+    series = series.filter(function (sr) { return sr && (sr.frames || []).length; });
+    if (!series.length) { testsBox.hidden = true; return; }
+
+    var $ = function (id) { return document.getElementById(id); };
+    var cmp = $("cmp"), cards = $("cards"), tabs = $("tests-tabs"), pickBox = $("pick");
+    var state = { s: 0, a: 0, b: 1, pos: 50, side: "b" };
+    var histCache = {};
+
+    function num(v) { var m = String(v || "").replace(",", ".").match(/\d+(?:\.\d+)?/); return m ? parseFloat(m[0]) : NaN; }
+    function secs(v) {
+      var t = String(v || "").replace(",", ".").trim(), m = t.match(/^1\s*\/\s*(\d+(?:\.\d+)?)/);
+      return m ? 1 / parseFloat(m[1]) : num(t);
+    }
+    function fAp(v) { var n = num(v); return isNaN(n) ? String(v || "") : "F" + n; }
+    function fmt(f, key) {
+      var v = f[key];
+      if (!v) return "";
+      if (key === "aperture") return fAp(v);
+      if (key === "iso" && /^\d/.test(String(v))) return "ISO " + v;
+      if (key === "focal" && /^\d+$/.test(String(v).trim())) return v + " mm";
+      return String(v);
+    }
+    function big(sr, f) {
+      var k = sr.topic || "shutter";
+      if (k === "aperture") return f.aperture ? "f/" + num(f.aperture) : "–";
+      if (k === "iso") return f.iso ? String(f.iso).replace(/^ISO\s*/i, "ISO ") : "–";
+      return fmt(f, k) || "–";
+    }
+    function stops(a, b, fn, power) {
+      var x = fn(a), y = fn(b);
+      if (isNaN(x) && isNaN(y)) return 0;
+      if (isNaN(x) || isNaN(y) || !x || !y) return NaN;
+      return power * Math.log(y / x) / Math.LN2;
+    }
+    function evDiff(a, b) {
+      return stops(a.shutter, b.shutter, secs, 1) + stops(a.iso, b.iso, num, 1) + stops(a.aperture, b.aperture, num, -2);
+    }
+    function evText(ev) {
+      if (isNaN(ev)) return "–";
+      var t = Math.round(ev * 3), w = Math.floor(Math.abs(t) / 3), r = Math.abs(t) % 3;
+      if (t === 0) return "±0 EV";
+      return (t > 0 ? "+" : "−") + (w || r ? (w ? w : "") + (r === 1 ? "⅓" : r === 2 ? "⅔" : "") : "0") + " EV";
+    }
+    function pad(n) { return String(n).padStart(2, "0"); }
+
+    function media(sr, f, tag) {
+      var box = el("div", { class: "cmp-img cmp-" + tag.toLowerCase() });
+      if (f.image) {
+        var img = el("img", { src: f.image, alt: tag + ": " + [fmt(f, "shutter"), fmt(f, "aperture"), fmt(f, "iso"), fmt(f, "wb"), fmt(f, "focal")].filter(Boolean).join(", "), decoding: "async", draggable: "false" });
+        img.addEventListener("load", function () {
+          if (tag === "A" && img.naturalWidth) {
+            var r = img.naturalWidth / img.naturalHeight, lbl = [["4:3", 4 / 3], ["3:2", 1.5], ["16:9", 16 / 9], ["1:1", 1], ["3:4", 0.75], ["2:3", 2 / 3]]
+              .reduce(function (b, x) { return Math.abs(x[1] - r) < Math.abs(b[1] - r) ? x : b; });
+            cmp.style.aspectRatio = img.naturalWidth + " / " + img.naturalHeight;
+            var rs = document.querySelector("#vf-status .ratio"); if (rs) rs.textContent = lbl[0];
+          }
+          drawHisto();
+        });
+        box.appendChild(img);
+      } else {
+        box.appendChild(el("div", { class: "cmp-ph" }, [el("span", { text: L.photo_ph }), el("b", { text: big(sr, f) })]));
+      }
+      box.appendChild(el("span", { class: "cmp-tag", text: tag + " · " + big(sr, f) }));
+      return box;
+    }
+
+    /* Histogram (luminance) from the actual photos, drawn as lines A (faint) and B (accent) */
+    function lum(src) {
+      if (histCache[src]) return histCache[src];
+      var img = cmp.querySelector('img[src="' + src.replace(/"/g, "") + '"]');
+      if (!img || !img.complete || !img.naturalWidth) return null;
+      try {
+        var c = document.createElement("canvas"), w = 160, h = Math.max(1, Math.round(160 * img.naturalHeight / img.naturalWidth));
+        c.width = w; c.height = h;
+        var ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, w, h);
+        var d = ctx.getImageData(0, 0, w, h).data, bins = new Array(48).fill(0);
+        for (var i = 0; i < d.length; i += 4) bins[Math.min(47, Math.floor((0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 256 * 48))]++;
+        var sm = bins.map(function (_, i) { var t = 0, n = 0; for (var k = -2; k <= 2; k++) if (bins[i + k] !== undefined) { t += bins[i + k]; n++; } return t / n; });
+        var mx = Math.max.apply(null, sm) || 1;
+        return (histCache[src] = sm.map(function (v) { return v / mx; }));
+      } catch (e) { return null; }
+    }
+    function line(h, cls) {
+      return '<polyline class="' + cls + '" points="' + h.map(function (v, i) { return (12 + i * 216 / 47).toFixed(1) + "," + (104 - v * 80).toFixed(1); }).join(" ") + '"/>';
+    }
+    function drawHisto() {
+      var sr = series[state.s], fa = sr.frames[state.a], fb = sr.frames[state.b];
+      var ha = fa.image ? lum(fa.image) : null, hb = fb.image ? lum(fb.image) : null;
+      var svg = '<svg viewBox="0 0 240 120" preserveAspectRatio="none" aria-hidden="true"><line class="g" x1="66" y1="16" x2="66" y2="104"/><line class="g" x1="120" y1="16" x2="120" y2="104"/><line class="g" x1="174" y1="16" x2="174" y2="104"/><line class="base" x1="12" y1="104" x2="228" y2="104"/>';
+      if (ha) svg += line(ha, "ha");
+      if (hb) svg += line(hb, "hb");
+      if (!ha && !hb) svg += '<path class="ha" d="M12 103 C 50 103, 60 40, 86 40 S 118 92, 132 92 S 150 62, 160 62 S 176 103, 228 103"/>';
+      $("vf-histo").innerHTML = '<span class="vf-histo-l">' + L.histo + '</span><span class="vf-histo-k"><i class="ka"></i>A <i class="kb"></i>B</span>' + svg + "</svg>";
+    }
+
+    function setPos(p) {
+      state.pos = Math.max(0, Math.min(100, Math.round(p)));
+      cmp.style.setProperty("--pos", state.pos + "%");
+      var h = cmp.querySelector(".cmp-handle");
+      if (h) { h.setAttribute("aria-valuenow", state.pos); h.setAttribute("aria-valuetext", L.cmpText(state.pos)); }
+    }
+
+    function renderView() {
+      var sr = series[state.s], fa = sr.frames[state.a], fb = sr.frames[state.b], n = sr.frames.length;
+      cmp.textContent = "";
+      cmp.style.aspectRatio = "";
+      cmp.classList.toggle("cmp-empty", !fa.image || !fb.image);
+      cmp.appendChild(media(sr, fa, "A"));
+      cmp.appendChild(media(sr, fb, "B"));
+      cmp.appendChild(el("div", { class: "cmp-af", "aria-hidden": "true" }, [el("i")]));
+      cmp.appendChild(el("div", { class: "cmp-handle", role: "slider", tabindex: "0", "aria-label": L.cmpLabel, "aria-valuemin": "0", "aria-valuemax": "100" }, [el("span")]));
+      setPos(state.pos);
+
+      $("vf-status").innerHTML = "";
+      [["mode", sr.mode || "M"], ["", "L"], ["ratio", "3:2"], ["", "AFS"], ["", fb.wb || "AWB"], ["", "STD."]].forEach(function (x) {
+        $("vf-status").appendChild(el("span", { class: x[0], text: x[1] }));
+      });
+      $("vf-status").appendChild(el("span", { class: "batt" }, [el("i"), el("i"), el("i")]));
+      $("vf-status").appendChild(el("span", { text: "98" }));
+
+      $("vf-counter").innerHTML = "<b>" + pad(state.b + 1) + "</b> / " + pad(n);
+
+      var keys = ["shutter", "aperture", "iso", "wb", "focal"];
+      $("vf-data").textContent = "";
+      [["A", fa], ["B", fb]].forEach(function (x) {
+        var row = el("div", { class: "vf-row" }, [el("span", { class: "tag", text: x[0] })]);
+        keys.map(function (k) { return fmt(x[1], k); }).filter(Boolean).forEach(function (v, i) {
+          if (i) row.appendChild(el("i", { class: "dot", "aria-hidden": "true" }));
+          row.appendChild(el("span", { text: v }));
+        });
+        $("vf-data").appendChild(row);
+      });
+
+      var ev = evDiff(fa, fb), x = isNaN(ev) ? null : 20 + (Math.max(-3, Math.min(3, ev)) + 3) / 6 * 560;
+      var ticks = "";
+      for (var t = -9; t <= 9; t++) {
+        var tx = 20 + (t + 9) / 18 * 560, major = t % 3 === 0;
+        ticks += '<line x1="' + tx + '" y1="34" x2="' + tx + '" y2="' + (major ? 20 : 27) + '"/>';
+        if (major) ticks += '<text x="' + tx + '" y="54">' + (t > 0 ? "+" : t < 0 ? "−" : "") + Math.abs(t / 3) + "</text>";
+      }
+      $("vf-expo").innerHTML = '<span class="vf-expo-l">' + L.evLabel + ' <b>' + (isNaN(ev) ? L.evNone : evText(ev)) + "</b></span>" +
+        '<svg viewBox="0 0 600 60" aria-hidden="true"><line x1="20" y1="34" x2="580" y2="34"/>' + ticks +
+        (x === null ? "" : '<path class="mk" d="M' + (x - 7) + " 4 L" + (x + 7) + " 4 L" + x + ' 14 Z"/>') + "</svg>";
+
+      $("vf-info").innerHTML = "";
+      $("vf-info").appendChild(el("div", { class: "eyebrow", text: L.series + " " + (sr.id || "") + " · " + (L.topics[sr.topic] || "") }));
+      $("vf-info").appendChild(el("h3", { text: pick(sr, "title") || L.topics[sr.topic] || "" }));
+      if (pick(sr, "text")) $("vf-info").appendChild(el("p", { text: pick(sr, "text") }));
+      $("vf-info").appendChild(el("p", { class: "hint", text: L.cmpHint }));
+
+      var arc = document.getElementById("vf-arc");
+      if (arc) arc.setAttribute("href", "/assets/img/deco.svg#" + (sr.topic === "focal" ? "arc-mm" : "arc-f"));
+
+      cards.querySelectorAll(".card").forEach(function (c, i) {
+        var side = i === state.a ? "A" : i === state.b ? "B" : "";
+        c.setAttribute("data-side", side);
+        c.setAttribute("aria-pressed", side ? "true" : "false");
+        c.setAttribute("aria-label", L.cardLabel(big(sr, sr.frames[i]), side === "A" ? L.left : side === "B" ? L.right : ""));
+      });
+      drawHisto();
+    }
+
+    function renderSeries() {
+      var sr = series[state.s], fr = sr.frames, n = fr.length;
+      var ref = fr.findIndex(function (f) { return f.reference; });
+      state.a = ref >= 0 ? ref : 0;
+      state.b = n > 1 ? (state.a === n - 1 ? 0 : n - 1) : 0;
+      cards.textContent = "";
+      fr.forEach(function (f, i) {
+        var others = ["shutter", "aperture", "iso", "wb", "focal"].filter(function (k) { return k !== (sr.topic || "shutter"); })
+          .map(function (k) { return fmt(f, k); }).filter(Boolean);
+        var b = el("button", { type: "button", class: "card" + (f.reference ? " hl" : "") }, [
+          el("span", { class: "row" }, [el("span", { text: L.series + " " + (sr.id || "") }), el("span", { text: pad(i + 1) + "/" + pad(n) })]),
+          el("span", { class: "val", text: big(sr, f) }),
+          el("span", { class: "meta" }, [el("span", { text: (L.topics[sr.topic] || "").toUpperCase() }), el("br"), el("span", { text: others.slice(0, 2).join(" · ") })]),
+          el("span", { class: "side", "aria-hidden": "true" })
+        ]);
+        b.addEventListener("click", function () {
+          if (state.side === "a") { if (i === state.b) state.b = state.a; state.a = i; }
+          else { if (i === state.a) state.a = state.b; state.b = i; }
+          renderView();
+        });
+        cards.appendChild(b);
+      });
+      tabs.querySelectorAll("[role=tab]").forEach(function (t, i) {
+        t.setAttribute("aria-selected", i === state.s ? "true" : "false");
+        t.tabIndex = i === state.s ? 0 : -1;
+      });
+      renderView();
+    }
+
+    if (series.length > 1) {
+      tabs.hidden = false;
+      series.forEach(function (sr, i) {
+        var t = el("button", { type: "button", role: "tab", text: (sr.id ? sr.id + " · " : "") + (pick(sr, "title") || L.topics[sr.topic] || "") });
+        t.addEventListener("click", function () { state.s = i; renderSeries(); });
+        t.addEventListener("keydown", function (e) {
+          var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+          if (!d) return;
+          e.preventDefault();
+          state.s = (state.s + d + series.length) % series.length; renderSeries();
+          tabs.querySelectorAll("[role=tab]")[state.s].focus();
+        });
+        tabs.appendChild(t);
+      });
+    }
+
+    pickBox.hidden = false;
+    pickBox.appendChild(el("span", { text: L.pickFor }));
+    [["a", "A"], ["b", "B"]].forEach(function (x) {
+      var b = el("button", { type: "button", text: x[1] + " · " + (x[0] === "a" ? L.left : L.right), "aria-pressed": x[0] === state.side ? "true" : "false" });
+      b.addEventListener("click", function () {
+        state.side = x[0];
+        pickBox.querySelectorAll("button").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      });
+      pickBox.appendChild(b);
     });
+
+    /* Dragging the divider */
+    var drag = false;
+    function fromEvent(e) { var r = cmp.getBoundingClientRect(); setPos((e.clientX - r.left) / r.width * 100); }
+    cmp.addEventListener("pointerdown", function (e) {
+      if (e.button !== undefined && e.button !== 0) return;
+      drag = true; try { cmp.setPointerCapture(e.pointerId); } catch (x) {}
+      fromEvent(e);
+    });
+    cmp.addEventListener("pointermove", function (e) { if (drag) fromEvent(e); });
+    ["pointerup", "pointercancel"].forEach(function (n) { cmp.addEventListener(n, function () { drag = false; }); });
+    cmp.addEventListener("keydown", function (e) {
+      if (!e.target.classList.contains("cmp-handle")) return;
+      var step = e.shiftKey ? 10 : 2, m = { ArrowLeft: -step, ArrowDown: -step, ArrowRight: step, ArrowUp: step }[e.key];
+      if (e.key === "Home") { setPos(0); e.preventDefault(); }
+      else if (e.key === "End") { setPos(100); e.preventDefault(); }
+      else if (m) { setPos(state.pos + m); e.preventDefault(); }
+    });
+
+    renderSeries();
   }).catch(function () {});
 })();

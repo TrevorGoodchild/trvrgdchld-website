@@ -175,36 +175,102 @@ collections:
     preview: false
   files:
   - name: lab
-    label: Vorhaltekarten
+    label: Testreihen
     file: public/content/lab.json
     fields:
     - name: series
-      label: Serien-Bezeichnung
-      widget: string
-      hint: z. B. A
-    - name: cards
-      label: Karten
-      label_singular: Karte
+      label: Testreihen
+      label_singular: Testreihe
       widget: list
-      summary: '{{fields.value}} · {{fields.aperture}} · {{fields.iso}}'
+      summary: '{{fields.id}} · {{fields.title_de}}'
       fields:
-      - name: value
-        label: Großer Wert
+      - name: id
+        label: Serien-Bezeichnung
         widget: string
-        hint: z. B. 1/250
-      - name: aperture
-        label: Blende
+        hint: z. B. A
+      - name: topic
+        label: Was wird verändert?
+        widget: select
+        default: shutter
+        options:
+        - label: Verschlusszeit
+          value: shutter
+        - label: Blende
+          value: aperture
+        - label: ISO
+          value: iso
+        - label: Weißabgleich
+          value: wb
+        - label: Brennweite
+          value: focal
+        hint: Dieser Wert steht groß auf den Vorhaltekarten.
+      - name: mode
+        label: Aufnahmemodus
+        widget: select
+        default: M
+        options:
+        - M
+        - A
+        - S
+        - P
+        required: false
+      - name: title_de
+        label: Titel (DE)
+        widget: string
+      - name: title_en
+        label: Titel (EN)
         widget: string
         required: false
-      - name: iso
-        label: ISO
-        widget: string
+      - name: text_de
+        label: Erklärung (DE)
+        widget: text
         required: false
-      - name: highlight
-        label: Hervorheben (Pfirsich)
-        widget: boolean
-        default: false
+      - name: text_en
+        label: Erklärung (EN)
+        widget: text
         required: false
+      - name: frames
+        label: Bilder / Vorhaltekarten
+        label_singular: Bild
+        widget: list
+        summary: '{{fields.shutter}} · {{fields.aperture}} · {{fields.iso}}'
+        fields:
+        - name: image
+          label: Foto
+          widget: image
+          required: false
+          hint: Querformat, am besten alle Bilder einer Serie mit gleichem Ausschnitt. Ca. 2000 px lange Kante.
+        - name: shutter
+          label: Verschlusszeit
+          widget: string
+          required: false
+          hint: z. B. 1/250
+        - name: aperture
+          label: Blende
+          widget: string
+          required: false
+          hint: z. B. f/5.6
+        - name: iso
+          label: ISO
+          widget: string
+          required: false
+          hint: z. B. ISO 200
+        - name: wb
+          label: Weißabgleich
+          widget: string
+          required: false
+          default: AWB
+          hint: z. B. AWB, Tageslicht oder 5500 K
+        - name: focal
+          label: Brennweite
+          widget: string
+          required: false
+          hint: 14, 18, 25, 35 oder 42 mm
+        - name: reference
+          label: Referenzbild (links, Pfirsich-Karte)
+          widget: boolean
+          default: false
+          required: false
 - name: rechtliches
   label: Rechtliches
   editor:

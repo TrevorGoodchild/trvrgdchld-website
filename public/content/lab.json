@@ -1,10 +1,36 @@
 {
-  "series": "A",
-  "cards": [
-    { "value": "1/15", "aperture": "f/5.6", "iso": "ISO 200", "highlight": false },
-    { "value": "1/60", "aperture": "f/5.6", "iso": "ISO 200", "highlight": false },
-    { "value": "1/250", "aperture": "f/5.6", "iso": "ISO 400", "highlight": true },
-    { "value": "1/1000", "aperture": "f/5.6", "iso": "ISO 1600", "highlight": false },
-    { "value": "1/4000", "aperture": "f/5.6", "iso": "ISO 6400", "highlight": false }
+  "series": [
+    {
+      "id": "A",
+      "topic": "shutter",
+      "mode": "S",
+      "title_de": "Verschlusszeit",
+      "title_en": "Shutter speed",
+      "text_de": "Gleiches Motiv, fünf Verschlusszeiten: Lange Zeiten zeigen Bewegung als Wischer, kurze frieren sie ein. Die ISO gleicht die Helligkeit teilweise aus.",
+      "text_en": "Same subject, five shutter speeds: long exposures turn motion into streaks, short ones freeze it. ISO partly compensates for the brightness.",
+      "frames": [
+        { "image": "", "shutter": "1/15", "aperture": "f/5.6", "iso": "ISO 200", "wb": "AWB", "focal": "25 mm", "reference": false },
+        { "image": "", "shutter": "1/60", "aperture": "f/5.6", "iso": "ISO 200", "wb": "AWB", "focal": "25 mm", "reference": false },
+        { "image": "", "shutter": "1/250", "aperture": "f/5.6", "iso": "ISO 400", "wb": "AWB", "focal": "25 mm", "reference": true },
+        { "image": "", "shutter": "1/1000", "aperture": "f/5.6", "iso": "ISO 1600", "wb": "AWB", "focal": "25 mm", "reference": false },
+        { "image": "", "shutter": "1/4000", "aperture": "f/5.6", "iso": "ISO 6400", "wb": "AWB", "focal": "25 mm", "reference": false }
+      ]
+    },
+    {
+      "id": "B",
+      "topic": "aperture",
+      "mode": "A",
+      "title_de": "Blende",
+      "title_en": "Aperture",
+      "text_de": "Gleiche Helligkeit, andere Blende: Bei f/3.5 wird der Hintergrund weich, bei f/22 ist fast alles scharf. Am schärfsten zeichnet das Kit-Objektiv bei f/4 bis f/6.",
+      "text_en": "Same brightness, different aperture: at f/3.5 the background goes soft, at f/22 almost everything is sharp. The kit lens is sharpest between f/4 and f/6.",
+      "frames": [
+        { "image": "", "shutter": "1/1000", "aperture": "f/3.5", "iso": "ISO 200", "wb": "AWB", "focal": "14 mm", "reference": true },
+        { "image": "", "shutter": "1/400", "aperture": "f/5.6", "iso": "ISO 200", "wb": "AWB", "focal": "14 mm", "reference": false },
+        { "image": "", "shutter": "1/200", "aperture": "f/8", "iso": "ISO 200", "wb": "AWB", "focal": "14 mm", "reference": false },
+        { "image": "", "shutter": "1/100", "aperture": "f/11", "iso": "ISO 200", "wb": "AWB", "focal": "14 mm", "reference": false },
+        { "image": "", "shutter": "1/25", "aperture": "f/22", "iso": "ISO 200", "wb": "AWB", "focal": "14 mm", "reference": false }
+      ]
+    }
   ]
 }

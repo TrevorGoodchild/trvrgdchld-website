@@ -62,6 +62,7 @@ T = {
         "album_back": "All albums", "album_photos": "photos", "album_label": "Album",
         "lab_eyebrow": "03 — Lab", "lab_h2": "Every series starts<br>with a card.",
         "lab_p": "Before every test shot, I hold a card with the settings up to the lens. That way it stays clear what shutter speed, aperture, ISO and white balance do to a subject.",
+        "tests_label": "Test series", "pick_label": "Which side a card sets",
         "lab_more": "More in the guide:", "lab_links": [("#aperture", "Aperture f/3.5–f/22"), ("#iso", "ISO 200–25600"), ("#wb", "White balance 2500–10000 K")],
         "about_eyebrow": "04 — About", "about_hi": "Hi, I’m ", "portrait": "[Portrait photo]",
         "services": [("Portrait & People", "Photo"), ("Logo animation", "Motion"), ("Product photography", "Photo"), ("Social reels", "Motion"), ("Event & Street", "Photo"), ("UI motion", "Motion")],
@@ -89,6 +90,7 @@ T = {
         "album_back": "Alle Alben", "album_photos": "Fotos", "album_label": "Album",
         "lab_eyebrow": "03 — Labor", "lab_h2": "Jede Serie beginnt<br>mit einer Karte.",
         "lab_p": "Vor jedem Testbild halte ich eine Karte mit den Einstellungen ins Bild. So bleibt nachvollziehbar, was Verschlusszeit, Blende, ISO und Weißabgleich mit einem Motiv machen.",
+        "tests_label": "Testreihen", "pick_label": "Welche Seite eine Karte setzt",
         "lab_more": "Mehr in der Praxis:", "lab_links": [("#blende", "Blende f/3.5–f/22"), ("#iso", "ISO 200–25600"), ("#weiss", "Weißabgleich 2500–10000 K")],
         "about_eyebrow": "04 — Über mich", "about_hi": "Hi, ich bin ", "portrait": "[Portraitfoto]",
         "services": [("Portrait & People", "Foto"), ("Logo-Animation", "Motion"), ("Produktfotografie", "Foto"), ("Social-Reels", "Motion"), ("Event & Street", "Foto"), ("UI-Motion", "Motion")],
@@ -183,6 +185,19 @@ def write(path, html):
     print("  ", p.relative_to(ROOT))
 
 
+# ---------------------------------------------------------------- Design-Elemente
+DECO_VB = {"af": "0 0 260 200", "cross": "0 0 200 200", "expo": "0 0 1000 120", "tilt": "0 0 110 560",
+           "scale-h": "0 0 1600 60", "scale-v": "0 0 60 1600", "arc-mm": "0 0 800 800", "arc-f": "0 0 800 800",
+           "arc-m": "0 0 800 800", "ring": "0 0 700 700", "histo": "0 0 420 240"}
+
+
+def deco(name, cls, use_id=None):
+    """Dezentes Kamera-Element aus assets/img/deco.svg (Farbe kommt aus CSS)."""
+    uid = f' id="{use_id}"' if use_id else ""
+    return (f'<svg class="deco {cls}" viewBox="{DECO_VB[name]}" aria-hidden="true" focusable="false">'
+            f'<use{uid} href="/assets/img/deco.svg#{name}" width="100%" height="100%"/></svg>')
+
+
 # ---------------------------------------------------------------- Startseite
 def home(lang):
     t = T[lang]
@@ -193,7 +208,8 @@ def home(lang):
     alt = "home"
     return head(lang, f"{SITE} – {'Photography & Motion' if lang == 'en' else 'Fotografie & Motion'}", t["desc"], "home", alt) + header(lang, "home", alt) + f"""<main id="main">
 
-<section class="hero" id="top">
+<section class="hero has-deco" id="top">
+{deco('scale-v', 'd-edge-l')}
 <div class="wrap hero-grid">
 <div class="hero-text">
 <div class="eyebrow">{t['hero_eyebrow']}<span data-set="city"></span></div>
@@ -205,6 +221,7 @@ def home(lang):
 </div>
 </div>
 <div class="hero-mark">
+{deco('ring', 'd-hero-ring')}
 <div class="logo-plate"><img class="logo-dark" src="/assets/img/logo-full-dark.png" alt="{t['logo_alt']}" width="800" height="757"><img class="logo-light" src="/assets/img/logo-full-light.png" alt="{t['logo_alt']}" width="800" height="757"></div>
 <span data-hide-empty="established">{t['est']} <span data-set="established"></span></span>
 </div>
@@ -222,7 +239,8 @@ def home(lang):
 </div>
 </section>
 
-<section class="panel" id="{ids[1]}">
+<section class="panel has-deco" id="{ids[1]}">
+{deco('histo', 'd-motion-histo')}{deco('tilt', 'd-motion-tilt')}
 <div class="wrap">
 <div class="section-head">
 <div class="titles"><div class="eyebrow">{t['motion_eyebrow']}</div><h2>{t['motion_h2']}</h2></div>
@@ -238,18 +256,32 @@ def home(lang):
 </div>
 </section>
 
-<section class="section" id="{ids[2]}">
+<section class="section has-deco" id="{ids[2]}">
+{deco('ring', 'd-lab-ring')}{deco('arc-f', 'd-lab-arc', 'vf-arc')}{deco('scale-v', 'd-edge-l')}
 <div class="wrap">
 <div class="section-head">
 <div class="titles"><div class="eyebrow">{t['lab_eyebrow']}</div><h2>{t['lab_h2']}</h2></div>
 <p>{t['lab_p']}</p>
 </div>
+<div class="tests" id="tests">
+<div class="tests-tabs" id="tests-tabs" role="tablist" aria-label="{t['tests_label']}" hidden></div>
+<div class="vf">
+<div class="vf-status" id="vf-status" aria-hidden="true"></div>
+<div class="vf-counter" id="vf-counter" aria-hidden="true"></div>
+<div class="vf-frame"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i><div class="cmp" id="cmp"></div></div>
+<div class="vf-data" id="vf-data"></div>
+<div class="vf-expo" id="vf-expo"></div>
+<div class="vf-side"><div class="vf-histo" id="vf-histo" aria-hidden="true"></div><div class="vf-info" id="vf-info" aria-live="polite"></div></div>
+</div>
+<div class="pick" id="pick" role="group" aria-label="{t['pick_label']}" hidden></div>
 <div class="cards" id="cards"></div>
+</div>
 <div class="lab-more"><span>{t['lab_more']}</span>{lab_links}</div>
 </div>
 </section>
 
-<section class="section" id="{ids[3]}">
+<section class="section has-deco" id="{ids[3]}">
+{deco('arc-m', 'd-about-arc')}
 <div class="wrap about">
 <div class="portrait" id="portrait">{t['portrait']}</div>
 <div class="about-text">
@@ -261,7 +293,8 @@ def home(lang):
 </div>
 </section>
 
-<section class="contact" id="{ids[4]}">
+<section class="contact has-deco" id="{ids[4]}">
+{deco('arc-f', 'd-contact-arc')}
 <div class="wrap">
 <div class="contact-top">
 <div><div class="eyebrow">{t['contact_eyebrow']}</div><h2>{t['contact_h2']}</h2></div>
@@ -291,7 +324,8 @@ def album(lang):
     back = URL[lang]["home"] + work
     return head(lang, f"{t['album_label']} – {SITE}", t["desc"], "album", "album") + header(lang, "album", "album") + f"""<main id="main" data-album-page>
 
-<section class="album-hero">
+<section class="album-hero has-deco">
+{deco('scale-v', 'd-edge-l')}{deco('af', 'd-album-af')}
 <div class="wrap">
 <a class="back" href="{back}">{ICON['back']}{t['album_back']}</a>
 <div class="eyebrow" id="album-meta">{t['album_label']}</div>
@@ -317,6 +351,7 @@ def album(lang):
 </section>
 
 <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="{t['album_label']}">
+<div class="lb-count" id="lb-count"></div>
 <button class="lb-close" type="button" aria-label="{'Close' if lang == 'en' else 'Schließen'}">×</button>
 <button class="lb-prev" type="button" aria-label="{'Previous photo' if lang == 'en' else 'Vorheriges Foto'}">‹</button>
 <figure><img alt=""><figcaption></figcaption></figure>
@@ -449,7 +484,8 @@ def guide(lang):
     cheat_id = "cheatsheet" if lang == "en" else "spickzettel"
     return head(lang, f"{g['title']} – {SITE}", g["desc"], "guide", "guide") + header(lang, "guide", "guide") + f"""<main id="main">
 
-<section class="guide-hero">
+<section class="guide-hero has-deco">
+{deco('scale-v', 'd-edge-l')}{deco('arc-f', 'd-guide-arc')}
 <div class="wrap">
 <div class="top">
 <div><div class="eyebrow">{g['eyebrow']}</div><h1>{g['h1']}</h1></div>
@@ -577,7 +613,8 @@ def legal_page(lang, page, kind, title, desc):
 
 
 def not_found():
-    return head("en", f"Page not found – {SITE}", "Page not found", "home", "home") + header("en", "404", "home") + f"""<main id="main" class="wrap">
+    return head("en", f"Page not found – {SITE}", "Page not found", "home", "home") + header("en", "404", "home") + f"""<main id="main" class="wrap nf">
+{deco('cross', 'd-nf-cross')}
 <div class="legal">
 <div><div class="eyebrow">404</div><h1>Out of frame.</h1>
 <p class="lead">This page doesn’t exist (anymore). · Diese Seite gibt es nicht (mehr).</p></div>
